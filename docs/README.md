@@ -8,7 +8,7 @@ Reference documentation and the project's GitHub Pages site.
 | `settings.md` | every setting, its default, precedence, and the state layout |
 | `architecture.md` | module map, command conventions, lock/state/HTTP design |
 | `parity.md` | the Nextcloud Desktop client parity matrix and its limits |
-| `index.html` | the landing page published at [sebastianspicker.github.io/rclone-sciebo-webdav](https://sebastianspicker.github.io/rclone-sciebo-webdav/) |
+| `index.html` | the landing page published at [sebastianspicker.github.io/rclone-webdav-sync](https://sebastianspicker.github.io/rclone-webdav-sync/) |
 | `assets/screenshots/` | real CLI output rendered to SVG by `tools/screenshots.py` (`make screenshots`) |
 
 `index.html` is a standalone page: a hero, the screenshot tour, a feature

@@ -45,7 +45,7 @@ body:
     id: versions
     attributes:
       label: Versions
-      description: "Output of `sciebo --version`, `bash --version | head -1`, and `rclone version | head -1`."
+      description: "rclone-webdav-sync version (`sciebo --version`), plus `bash --version | head -1` and `rclone version | head -1`."
       placeholder: "sciebo 0.2.0 / GNU bash, version 5.3.0 / rclone v1.75.1"
     validations:
       required: true

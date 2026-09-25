@@ -36,7 +36,7 @@ usage_cleanup() {
   usage_emit <<'EOF'
 Usage: sciebo cleanup (--logs | --uploads | --state | --junk | --cache | --support) [--apply]
 
-Housekeeping for the rclone-sciebo tooling. Dry run by default: nothing
+Housekeeping for rclone-webdav-sync. Dry run by default: nothing
 is deleted unless --apply is given. Refuses to run while the local sync
 lock is held; runs on other devices cannot be detected, so chunk uploads
 are only removed once older than CHUNK_CLEANUP_MIN_AGE. State leftovers

@@ -1,16 +1,14 @@
-# rclone-sciebo-webdav
+# rclone-webdav-sync
 
-[![CI](https://github.com/sebastianspicker/rclone-sciebo-webdav/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastianspicker/rclone-sciebo-webdav/actions/workflows/ci.yml)
+[![CI](https://github.com/sebastianspicker/rclone-webdav-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastianspicker/rclone-webdav-sync/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform: macOS | Linux](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](#requirements)
 [![Bash 5.3+](https://img.shields.io/badge/bash-5.3%2B-blue.svg)](#requirements)
 [![rclone >= 1.69](https://img.shields.io/badge/rclone-%E2%89%A5%201.69-4a90d9.svg)](https://rclone.org)
 
-`sciebo` is a command-line tool, written in Bash, that keeps local folders and git repositories in sync with a Nextcloud server. It talks to the server over WebDAV, the file-access protocol Nextcloud exposes, and uses [rclone](https://rclone.org/webdav/) to do the actual file transfers.
+rclone-webdav-sync is an unofficial command-line client for sciebo (Hochschulcloud.NRW) and other Nextcloud servers, written in Bash. It keeps local folders and git repositories in sync with a Nextcloud server: it talks to the server over WebDAV, the file-access protocol Nextcloud exposes, and uses [rclone](https://rclone.org/webdav/) to do the actual file transfers.
 
-It works with any Nextcloud server. Its default target and namesake is [sciebo](https://www.sciebo.de), the Nextcloud-based cloud storage service for universities in North Rhine-Westphalia, Germany.
-
-In this README, "sciebo" on its own means this tool; "the sciebo service" means the university storage service.
+It works with any Nextcloud server. Its default target is [sciebo](https://hochschulcloud.nrw/), the Nextcloud-based cloud storage service for universities in North Rhine-Westphalia, Germany. The command this tool installs is `sciebo`, named after that service; the name belongs to the sciebo service, not to this project.
 <!-- src: README.md -->
 
 ## What it does
@@ -23,7 +21,7 @@ In this README, "sciebo" on its own means this tool; "the sciebo service" means 
 
 ## Not affiliated with Nextcloud or sciebo
 
-This is an independent project. It is not affiliated with, endorsed by, or supported by Nextcloud GmbH or the sciebo service operators; Nextcloud and sciebo are trademarks/names of their respective owners.
+This is an independent project. It is not affiliated with, endorsed by, or supported by Nextcloud GmbH or the operators of [sciebo – die Hochschulcloud.NRW](https://hochschulcloud.nrw/); Nextcloud and sciebo are trademarks/names of their respective owners.
 <!-- src: README.md#not-affiliated-with-nextcloud-or-sciebo -->
 
 ## Screenshot tour
@@ -86,15 +84,15 @@ Platform caveats: not every backend exists on both operating systems, so some fe
 Clone the repository and run it straight from the checkout, or install it onto your `PATH`:
 
 ```sh
-git clone https://github.com/sebastianspicker/rclone-sciebo-webdav.git
-cd rclone-sciebo-webdav
+git clone https://github.com/sebastianspicker/rclone-webdav-sync.git
+cd rclone-webdav-sync
 
 bin/sciebo help          # run straight from the checkout
 
 make install             # copies the tree to ~/.local/share/rclone-sciebo
                           # and writes a ~/.local/bin/sciebo wrapper
 make install PREFIX=/usr/local
-make dist                # source tarball: dist/rclone-sciebo-<version>.tar.gz
+make dist                # source tarball: dist/rclone-webdav-sync-<version>.tar.gz
 ```
 <!-- src: README.md#install -->
 
@@ -192,7 +190,7 @@ bin/sciebo schedule install --at-login --profiles work,home
 
 ## Compared with nextcloudcmd
 
-"nextcloudcmd" names two different things in this document: the third-party [`nextcloudcmd`](https://docs.nextcloud.com/server/stable/user_manual/en/desktop/commandline.html) tool that ships with the Nextcloud desktop client packages, discussed below, and sciebo's own `sciebo nextcloudcmd` command, which deliberately accepts that external tool's option names for easy migration (see the table's Migration row). Unqualified, "nextcloudcmd" below means the external tool.
+"nextcloudcmd" names two different things in this document: the third-party [`nextcloudcmd`](https://docs.nextcloud.com/server/stable/user_manual/en/desktop/commandline.html) tool that ships with the Nextcloud desktop client packages, discussed below, and this tool's own `sciebo nextcloudcmd` command, which deliberately accepts that external tool's option names for easy migration (see the table's Migration row). Unqualified, "nextcloudcmd" below means the external tool.
 
 It ships with the Nextcloud desktop client packages (Alpine, Debian, Fedora, Ubuntu, the Ubuntu PPA, and Windows). Per its manual, it "performs a single sync run and then exits": it does not repeat synchronizations on its own and does not monitor for file system changes. One invocation syncs one local folder against one remote location (`--path` picks a server subfolder). It is the right tool when you already run the desktop client packages and want one folder synced on demand or from a script.
 <!-- src: README.md#compared-with-nextcloudcmd -->
@@ -209,13 +207,13 @@ It ships with the Nextcloud desktop client packages (Alpine, Debian, Fedora, Ubu
 | Migration | — | `sciebo nextcloudcmd` accepts `nextcloudcmd`'s own option names; `scripts/nextcloudcmd` is a drop-in shim for existing cron jobs |
 <!-- src: README.md#compared-with-nextcloudcmd -->
 
-If you already run the desktop client packages and only need one folder synced from a script or cron job, `nextcloudcmd` stays the simpler choice: it needs nothing beyond the client itself. If you want the desktop client's other behavior (several folders, shares, scheduled or live sync) on a machine without a desktop session, `sciebo` trades that simplicity for three command-line dependencies instead of the client packages.
+If you already run the desktop client packages and only need one folder synced from a script or cron job, `nextcloudcmd` stays the simpler choice: it needs nothing beyond the client itself. If you want the desktop client's other behavior (several folders, shares, scheduled or live sync) on a machine without a desktop session, this tool trades that simplicity for three command-line dependencies instead of the client packages.
 
 ## The desktop client, in the shell
 
 The table below maps the desktop client's day-to-day features onto commands; the full parity matrix, including its documented gaps, is in [docs/parity.md](docs/parity.md).
 
-| Desktop client feature | sciebo command |
+| Desktop client feature | `sciebo` command |
 | --- | --- |
 | Account setup (Login Flow / app password) | `setup --login`, `setup` |
 | Choosing which folders sync | `folders choose` |
@@ -232,7 +230,7 @@ The table below maps the desktop client's day-to-day features onto commands; the
 | Metered-network handling | `network`, `METERED_POLICY` |
 <!-- src: README.md#the-desktop-client-in-the-shell -->
 
-`sciebo` is a CLI, not a GUI: there is no tray icon, and nothing adds a sync-state overlay to Finder or Explorer. Virtual files (the OS feature that shows cloud files as if downloaded, without using disk space) are approximated, not replicated: `mount` exposes the remote as an on-demand filesystem via `rclone nfsmount`, and `hydrate`/`edit` fetch one path or file explicitly; [docs/parity.md](docs/parity.md#not-implementable) lists what a platform file-provider extension would still be needed for.
+This tool is a CLI, not a GUI: there is no tray icon, and nothing adds a sync-state overlay to Finder or Explorer. Virtual files (the OS feature that shows cloud files as if downloaded, without using disk space) are approximated, not replicated: `mount` exposes the remote as an on-demand filesystem via `rclone nfsmount`, and `hydrate`/`edit` fetch one path or file explicitly; [docs/parity.md](docs/parity.md#not-implementable) lists what a platform file-provider extension would still be needed for.
 
 ## Commands
 
@@ -269,7 +267,7 @@ The full policy list, conflict handling, and what's deliberately out of scope (N
 
 ## Being a good sciebo (service) citizen
 
-This section is about the sciebo service specifically, not the sciebo CLI's own behavior; other Nextcloud servers may set different limits. The sciebo service warns that WebDAV is unsupported and asks users to keep sync intervals large and sync only what is needed.
+This section is about the sciebo service specifically, not this tool's own behavior; other Nextcloud servers may set different limits. The sciebo service warns that WebDAV is unsupported and asks users to keep sync intervals large and sync only what is needed.
 <!-- src: README.md#sciebo-etiquette -->
 
 The defaults here are deliberately gentle (`TRANSFERS=2`, `CHECKERS=4`, `TPSLIMIT=8`); override them in `config/settings.local.env` for a self-hosted or more permissive server. Nextcloud admins can raise the chunk size to 1 GB server-side for better throughput ([Nextcloud docs](https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/big_file_upload_configuration.html#adjust-chunk-size-on-nextcloud-side)). `MAX_PARALLEL_SOURCES` is `1` for the same reason; raise it only if the server can take the extra connections. Upload chunking follows the desktop client: with `CHUNK_SIZE` unset, a chunk is derived once per run from `TARGET_CHUNK_UPLOAD_DURATION` times the effective upload throughput (`BW_LIMIT_UP`, else `TARGET_UPLOAD_THROUGHPUT`), capped at the server's maximum and clamped to `MIN_CHUNK_SIZE`/`MAX_CHUNK_SIZE` (`CHUNK_SIZE` always wins).
@@ -288,7 +286,7 @@ The defaults here are deliberately gentle (`TRANSFERS=2`, `CHECKERS=4`, `TPSLIMI
 | [CHANGELOG.md](CHANGELOG.md) | what changed in each release |
 <!-- src: README.md#documentation -->
 
-[docs/index.html](docs/index.html), also published at <https://sebastianspicker.github.io/rclone-sciebo-webdav/>, is a standalone demo page with the full screenshot gallery and quick-start snippets.
+[docs/index.html](docs/index.html), also published at <https://sebastianspicker.github.io/rclone-webdav-sync/>, is a standalone demo page with the full screenshot gallery and quick-start snippets.
 
 ## Contributing, security, and development
 
@@ -317,12 +315,12 @@ If a launchd agent was installed for the old `scripts/sync.sh` entrypoint, re-ru
 
 ## Limitations
 
-These apply regardless of how sciebo is configured:
+These apply regardless of how this tool is configured:
 
 - **Not affiliated.** This project is independent of Nextcloud GmbH and the sciebo service operators; see [Not affiliated with Nextcloud or sciebo](#not-affiliated-with-nextcloud-or-sciebo) above.
 - **Git is not special-cased.** `.git/` syncs as ordinary files, with no awareness of git's own object model. Avoid syncing a repository while git is rewriting objects, and don't run `bisync` on a repository you're actively working in.
 <!-- src: README.md#safety-model -->
-- **No tray icon or file-manager overlay.** sciebo is a CLI; there is no system tray icon and nothing marks synced files in Finder or Explorer. On-demand access approximates the desktop client's virtual files through `mount`/`hydrate`/`edit`, but does not replicate it.
+- **No tray icon or file-manager overlay.** This tool is a CLI; there is no system tray icon and nothing marks synced files in Finder or Explorer. On-demand access approximates the desktop client's virtual files through `mount`/`hydrate`/`edit`, but does not replicate it.
 <!-- src: README.md#the-desktop-client-in-the-shell -->
 - **Deliberately out of scope.** Full Nextcloud end-to-end encryption (E2EE), a background sync daemon that runs without being asked, and a true virtual-files overlay are not goals of this project. [docs/parity.md](docs/parity.md) lists each one with the reason it can't be built as a CLI feature.
 <!-- src: README.md#safety-model -->
@@ -335,15 +333,15 @@ Plain-language terms used above; see the linked documentation pages for full det
 
 | Term | Meaning |
 | --- | --- |
-| the sciebo service | The Nextcloud-based cloud storage service for NRW's universities; a third party, not part of this project. |
-| the sciebo CLI / sciebo | This project's command-line program, named after the service but usable with any Nextcloud server. |
-| Nextcloud | The open-source server software the sciebo service (and other institutions) run; sciebo the tool talks to any Nextcloud server, not only sciebo. |
-| rclone | The third-party file-transfer engine sciebo is built on; sciebo configures and runs it rather than talking to the server directly for transfers. |
+| sciebo | The Hochschulcloud.NRW cloud storage service for NRW universities; this project is an unofficial client for it. |
+| `sciebo` (command) | The command this tool installs; named after the service. |
+| Nextcloud | The open-source server software the sciebo service (and other institutions) run; this tool talks to any Nextcloud server, not only sciebo. |
+| rclone | The third-party file-transfer engine this tool is built on; this tool configures and runs it rather than talking to the server directly for transfers. |
 | remote / rclone remote | A named rclone configuration entry (default name `sciebo`) that holds the server URL and how to authenticate. Not the same as "remote" meaning "on the server" in casual use. |
-| WebDAV | The network protocol rclone and sciebo's direct HTTP calls use to talk to Nextcloud. |
+| WebDAV | The network protocol rclone and this tool's direct HTTP calls use to talk to Nextcloud. |
 | app password | A Nextcloud-issued password scoped to one application/device, used instead of the account's main password. |
 | the browser sign-in flow (Login Flow v2) | Nextcloud's browser-based authentication handshake that `setup --login` drives; produces an app password without the user typing one in. |
-| keychain / the system's password manager | The OS-level secret store (macOS Keychain, Linux secret-tool/pass) sciebo prefers for the app password over the rclone config file. |
+| keychain / the system's password manager | The OS-level secret store (macOS Keychain, Linux secret-tool/pass) this tool prefers for the app password over the rclone config file. |
 | manifest / sync list | The set of configured folder pairs (from `sources.conf`, `folders.conf`) that `sync`/`check`/etc. act on. |
 | folder pair / source | One line in the sync list: a local folder, a remote folder, and a direction. |
 | sync (one-way upload) | Direction that mirrors local to remote; local deletions are sent to the server. |
@@ -353,13 +351,13 @@ Plain-language terms used above; see the linked documentation pages for full det
 | delete guard | The safety check that stops a run before it deletes more files than a configured threshold, asking for confirmation instead. |
 | bisync resync (two-way sync's first-time reset) | The one-time `--resync` step that initializes bisync's bookkeeping; can copy or delete files on both sides and must be reviewed as a dry run first. |
 | conflict copy | A file bisync creates when both sides changed the same file, kept alongside the original rather than silently overwriting. |
-| E2EE (end-to-end encryption) | Nextcloud's client-side encryption feature; sciebo (like rclone) only ever sees the encrypted bytes and excludes E2EE folders by default. |
-| external storage | A Nextcloud folder backed by another storage system on the server side (not local disk), which sciebo treats more cautiously by default. |
+| E2EE (end-to-end encryption) | Nextcloud's client-side encryption feature; this tool (like rclone) only ever sees the encrypted bytes and excludes E2EE folders by default. |
+| external storage | A Nextcloud folder backed by another storage system on the server side (not local disk), which this tool treats more cautiously by default. |
 | capabilities probe / server feature check | A one-time-per-cache-window API call that discovers what the connected server supports (chunk size, trashbin, checksums, version). |
 | account profile | An independent, named account setup (its own remote, sync list, filters, and state), used to manage more than one Nextcloud account. |
 | filter file | A plain-text rule file (rclone syntax) that excludes or includes paths from a sync. |
-| safety policy | A named setting that chooses how sciebo reacts to a risky situation: allow it, warn, ask first, or skip/exclude it. |
+| safety policy | A named setting that chooses how this tool reacts to a risky situation: allow it, warn, ask first, or skip/exclude it. |
 | watch (live sync) | An optional, foreground command that syncs a folder as soon as it changes; not a background service. |
 | scheduled runs | An optional, installable background job (via the OS's own scheduler) that runs sync periodically; opt-in, not automatic. |
 | the Nextcloud desktop client's `nextcloudcmd` tool | The separate, third-party command-line tool that ships with Nextcloud's desktop client packages. |
-| sciebo's nextcloudcmd-compatible command | This project's own `sciebo nextcloudcmd` command, built to accept the external tool's option names for easy migration; not the same program. |
+| this tool's nextcloudcmd-compatible command | This project's own `sciebo nextcloudcmd` command, built to accept the external tool's option names for easy migration; not the same program. |

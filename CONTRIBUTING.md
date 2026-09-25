@@ -3,13 +3,15 @@
 Thanks for stopping by. Bug reports, ideas, and pull requests are all
 welcome.
 
-This document is for a contributor about to open a pull request. Contributing
-looks like this end to end: set up the toolchain below, follow the rules in
+This document is for a contributor about to open a pull request to
+rclone-webdav-sync, an unofficial command-line client for sciebo
+(Hochschulcloud.NRW) and other Nextcloud servers. Contributing looks like
+this end to end: set up the toolchain below, follow the rules in
 [What this codebase cares about](#what-this-codebase-cares-about), find the
 right layer for your change in [Where code goes](#where-code-goes), then run
 the checklist in [Before you open a pull request](#before-you-open-a-pull-request).
-"sciebo" here is this project's CLI, not the sciebo cloud service for NRW's
-universities that the CLI happens to be named after; the tool works with any
+The command is named after the service it connects to; the name belongs to
+the sciebo service, not to this project, and this tool works with any
 Nextcloud server.
 <!-- src: CONTRIBUTING.md -->
 
@@ -126,9 +128,9 @@ includes updating the docs, not only the code.
 
 | Term | Meaning |
 | --- | --- |
-| sciebo (the CLI) | This project's command-line program; usable with any Nextcloud server, not only the sciebo service. |
-| sciebo (the service) | The Nextcloud-based cloud storage service for NRW's universities; a third party, not part of this project. |
+| sciebo | The Hochschulcloud.NRW cloud storage service for NRW universities; this project is an unofficial client for it. |
+| `sciebo` (command) | The command this tool installs; named after the service. |
 | Nextcloud | The open-source server software the sciebo service and other institutions run. |
-| rclone | The third-party file-transfer engine sciebo is built on. |
+| rclone | The third-party file-transfer engine this tool is built on. |
 | layer | One of seven ordered internal code groupings (from basic helpers up to individual commands); lower layers never depend on higher ones. |
 | tier (core / extra) | `core` commands are covered by tests against a real Nextcloud server; `extra` commands are newer and tested only against a local stand-in. |

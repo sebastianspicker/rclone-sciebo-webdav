@@ -168,7 +168,7 @@ emit_bash() {
   cat <<BASH_HEADER
 $HEADER
 #
-# bash completion for the sciebo CLI. Install: source this file from a
+# bash completion for the 'sciebo' command (rclone-webdav-sync). Install: source this file from a
 # bash-completion drop-in, or copy it into a completions directory (for
 # example ~/.local/share/bash-completion/completions/sciebo).
 
@@ -576,7 +576,7 @@ emit_zsh() {
 #compdef sciebo
 $HEADER
 #
-# zsh completion for the sciebo CLI. Put this file on \$fpath as \`_sciebo\`;
+# zsh completion for the 'sciebo' command (rclone-webdav-sync). Put this file on \$fpath as \`_sciebo\`;
 # compinit then picks it up automatically.
 
 typeset -ga _sciebo_global_specs
@@ -737,7 +737,7 @@ emit_fish() {
   cat <<FISH_HEADER
 $HEADER
 #
-# fish completion for the sciebo CLI. Install by copying this file to
+# fish completion for the 'sciebo' command (rclone-webdav-sync). Install by copying this file to
 # ~/.config/fish/completions/sciebo.fish, or add completions/ to
 # \$fish_complete_path.
 

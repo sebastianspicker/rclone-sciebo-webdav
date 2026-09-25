@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# integration.sh - end-to-end tests for the sciebo CLI.
+# integration.sh - end-to-end tests for the `sciebo` command.
 # Run from any directory: bash tests/integration.sh
 #
 # Isolation: the CLI runs as `bash "$PROJ/bin/sciebo" ...` (Bash

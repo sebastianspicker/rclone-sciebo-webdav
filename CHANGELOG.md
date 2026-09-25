@@ -115,6 +115,6 @@ git discovery, Login Flow v2 with Keychain storage, capabilities probe,
 filters and `.nosync`, verify/status/pause, launchd scheduling, on-demand
 mounts, cleanup, and the read-only trashbin/version listings.
 
-[Unreleased]: https://github.com/sebastianspicker/rclone-sciebo-webdav/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/sebastianspicker/rclone-sciebo-webdav/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/sebastianspicker/rclone-sciebo-webdav/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sebastianspicker/rclone-webdav-sync/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/sebastianspicker/rclone-webdav-sync/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/sebastianspicker/rclone-webdav-sync/releases/tag/v0.1.0

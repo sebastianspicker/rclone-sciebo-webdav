@@ -48,7 +48,7 @@ jobs:
           make install PREFIX="$RUNNER_TEMP/prefix"
           "$RUNNER_TEMP/prefix/bin/sciebo" --version
           make dist
-          test -f "dist/rclone-sciebo-$(cat VERSION).tar.gz"
+          test -f "dist/rclone-webdav-sync-$(cat VERSION).tar.gz"
 
   lint-and-test-linux:
     # Bash 5.3 on Linux: proves the CLI does not depend on macOS-only bash

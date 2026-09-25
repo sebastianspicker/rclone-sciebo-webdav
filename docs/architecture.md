@@ -8,13 +8,14 @@ the mental model, then [Adding a command](#adding-a-command) when you are
 ready to write code, and [External contracts](#external-contracts) before you
 refactor anything that looks load-bearing.
 
-`sciebo` is a Bash CLI that mirrors local directories and git repositories to
-a sciebo (or any Nextcloud) WebDAV remote through rclone, with
-Nextcloud-desktop-client parity (sync/pull/bisync, shares, notifications,
-on-demand mounts) and no daemon unless the user opts into `watch` or
-`schedule install`. "sciebo" here means the CLI this project ships, not the
-sciebo cloud service for NRW's universities; the tool talks to any Nextcloud
-server, not only that one.
+rclone-webdav-sync, an unofficial command-line client for sciebo
+(Hochschulcloud.NRW) and other Nextcloud servers, is a Bash CLI, invoked as
+`sciebo`, that mirrors local directories and git repositories to a Nextcloud
+WebDAV remote through rclone, with Nextcloud-desktop-client parity
+(sync/pull/bisync, shares, notifications, on-demand mounts) and no daemon
+unless the user opts into `watch` or `schedule install`. The command is named
+after the service it connects to; the name belongs to the sciebo service, not
+to this project. This tool talks to any Nextcloud server, not only sciebo.
 <!-- src: architecture.md -->
 
 There is no build step; `bin/sciebo` runs straight from the checkout. Each
@@ -649,24 +650,24 @@ this project's documentation:
 
 | Term | Meaning |
 | --- | --- |
-| sciebo (the CLI) | This project's command-line program; usable with any Nextcloud server, not only the sciebo service. |
-| sciebo (the service) | The Nextcloud-based cloud storage service for NRW's universities; a third party, not part of this project. |
+| sciebo | The Hochschulcloud.NRW cloud storage service for NRW universities; this project is an unofficial client for it. |
+| `sciebo` (command) | The command this tool installs; named after the service. |
 | Nextcloud | The open-source server software the sciebo service and other institutions run. |
-| rclone | The third-party file-transfer engine sciebo is built on; sciebo configures and runs it rather than talking to the server directly for transfers. |
+| rclone | The third-party file-transfer engine this tool is built on; this tool configures and runs it rather than talking to the server directly for transfers. |
 | remote / rclone remote | A named rclone configuration entry (default name `sciebo`, held in `RCLONE_REMOTE`) that holds the server URL and how to authenticate. |
-| WebDAV | The file-access protocol rclone and sciebo's direct HTTP calls use against the server. |
+| WebDAV | The file-access protocol rclone and this tool's direct HTTP calls use against the server. |
 | app password | A Nextcloud-issued password scoped to one application/device, used instead of the account's main password. |
-| keychain | The OS-level secret store (macOS Keychain, Linux secret-tool/pass) sciebo prefers for the app password over the rclone config file. |
+| keychain | The OS-level secret store (macOS Keychain, Linux secret-tool/pass) this tool prefers for the app password over the rclone config file. |
 | manifest | The set of configured folder pairs (the sync list) that `sync`/`check`/etc. act on. |
 | layer | One of seven ordered internal code groupings (from basic helpers up to individual commands); lower layers never depend on higher ones. |
-| state directory | Where sciebo stores run history, locks, caches, and other bookkeeping, separate from synced files. |
+| state directory | Where this tool stores run history, locks, caches, and other bookkeeping, separate from synced files. |
 | run lock | A safeguard that stops two sync/cleanup runs from overlapping on the same machine. |
-| policy (e.g. `E2EE_POLICY`) | A named setting that chooses how sciebo reacts to a risky situation: allow it, warn, ask first, or skip/exclude it. |
+| policy (e.g. `E2EE_POLICY`) | A named setting that chooses how this tool reacts to a risky situation: allow it, warn, ask first, or skip/exclude it. |
 | tier (core / extra) | `core` commands are covered by tests against a real Nextcloud server; `extra` commands are newer and tested only against a local stand-in. |
 | profile | An independent, named account setup (its own remote, sync list, filters, and state), used to manage more than one Nextcloud account. |
 | filter file | A plain-text rule file (rclone syntax) that excludes or includes paths from a sync. |
 | capabilities probe | A one-time-per-cache-window API call that discovers what the connected server supports (chunk size, trashbin, checksums, version). |
-| metered network | A connection sciebo can detect and treat more cautiously, e.g. a mobile hotspot. |
-| blacklist (failure) | The list of paths sciebo has temporarily stopped retrying after repeated failures, until `sciebo retry` clears them. |
+| metered network | A connection this tool can detect and treat more cautiously, e.g. a mobile hotspot. |
+| blacklist (failure) | The list of paths this tool has temporarily stopped retrying after repeated failures, until `sciebo retry` clears them. |
 | watch | An optional, foreground command that syncs a folder as soon as it changes; not a background service. |
 | schedule | An optional, installable background job (via the OS's own scheduler) that runs sync periodically; opt-in, not automatic. |

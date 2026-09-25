@@ -13,7 +13,7 @@ discussions, or any other project space.
 
 If you experience or witness unacceptable behavior in this project, report it
 through a
-[private GitHub security advisory](https://github.com/sebastianspicker/rclone-sciebo-webdav/security/advisories/new)
+[private GitHub security advisory](https://github.com/sebastianspicker/rclone-webdav-sync/security/advisories/new)
 on this repository, or by contacting GitHub Support directly if the concern
 involves a maintainer. Reports are handled as confidentially as possible.
 

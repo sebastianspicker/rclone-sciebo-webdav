@@ -21,16 +21,16 @@ body:
     id: alternatives
     attributes:
       label: Alternatives considered
-      description: Other ways to solve this, including doing it outside sciebo (a filter, a cron job, a different rclone flag).
+      description: Other ways to solve this, including doing it outside this tool (a filter, a cron job, a different rclone flag).
     validations:
       required: false
   - type: dropdown
     id: scope
     attributes:
-      label: Is this sciebo-specific or general Nextcloud?
-      description: Some behavior (etiquette limits, chunk sizes) is tuned for sciebo specifically; other features apply to any Nextcloud server.
+      label: Is this specific to sciebo (Hochschulcloud.NRW) or general to any Nextcloud server?
+      description: Some behavior (etiquette limits, chunk sizes) is tuned for sciebo (Hochschulcloud.NRW) specifically; other features apply to any Nextcloud server.
       options:
-        - Specific to sciebo
+        - Specific to sciebo (Hochschulcloud.NRW)
         - Any Nextcloud server
         - Not sure
     validations:

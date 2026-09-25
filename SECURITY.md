@@ -1,10 +1,11 @@
 # Security model
 
 This document is for a security reviewer, or a security-conscious operator
-deciding whether to trust this tool with a real Nextcloud credential.
-`rclone-sciebo` keeps exactly one credential: the Nextcloud app password (a
-password scoped to just this tool, not the account's main login) for the
-configured remote. It describes where that credential lives at rest, how it
+deciding whether to trust rclone-webdav-sync, an unofficial command-line
+client for sciebo (Hochschulcloud.NRW) and other Nextcloud servers, with a
+real Nextcloud credential. It keeps exactly one credential: the Nextcloud app
+password (a password scoped to just this tool, not the account's main login)
+for the configured remote. It describes where that credential lives at rest, how it
 travels, and every place it can transiently appear in a process list, a log,
 or a temporary file, even briefly. It is a threat model for the tool itself,
 not a formal audit, and it names the residual exposures that are accepted by
@@ -197,11 +198,16 @@ process on the same machine.
 
 ## Reporting a vulnerability
 
-Report suspected vulnerabilities through a private
+Report a vulnerability in this project through a private
 [GitHub Security Advisory](https://docs.github.com/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
 on the repository (Security -> Advisories -> Report a vulnerability) rather
 than in a public issue. If the repository is mirrored elsewhere, use the
-advisory form on the canonical host.
+advisory form on the canonical host. This project is an independent,
+unofficial client and is not affiliated with, endorsed by, or supported by
+the sciebo / Hochschulcloud.NRW operators or Nextcloud GmbH: a problem with
+the sciebo service itself (an outage, an account issue, or a vulnerability in
+the service) is not something this project can fix and should go to the
+service's own support channel, not here.
 <!-- src: SECURITY.md#reporting-a-vulnerability -->
 
 Please include the version (`sciebo --version`), the platform, the exact
@@ -238,13 +244,13 @@ as absolute; the concentration of these is in
 
 | Term | Meaning |
 | --- | --- |
-| sciebo (the CLI) | This project's command-line program; usable with any Nextcloud server, not only the sciebo service. |
-| sciebo (the service) | The Nextcloud-based cloud storage service for NRW's universities; a third party, not part of this project. |
+| sciebo | The Hochschulcloud.NRW cloud storage service for NRW universities; this project is an unofficial client for it. |
+| `sciebo` (command) | The command this tool installs; named after the service. |
 | Nextcloud | The open-source server software the sciebo service and other institutions run. |
-| rclone | The third-party file-transfer engine sciebo is built on; sciebo configures and runs it rather than talking to the server directly for transfers. |
+| rclone | The third-party file-transfer engine this tool is built on; this tool configures and runs it rather than talking to the server directly for transfers. |
 | remote / rclone remote | A named rclone configuration entry (default name `sciebo`, held in `RCLONE_REMOTE`) that holds the server URL and how to authenticate. |
 | app password | A Nextcloud-issued password scoped to one application/device, used instead of the account's main password. |
-| keychain | The OS-level secret store (macOS Keychain, Linux secret-tool/pass) sciebo prefers for the app password over the rclone config file. |
+| keychain | The OS-level secret store (macOS Keychain, Linux secret-tool/pass) this tool prefers for the app password over the rclone config file. |
 | obscured (rclone term) | Reversibly encoded, not encrypted; recoverable by anyone who can read the file it is stored in. |
 | argv | The command's visible arguments, readable by anyone who can list processes on the same machine. |
 | TOCTOU-safe | Safe against a file being swapped out between the permission check and the read. |

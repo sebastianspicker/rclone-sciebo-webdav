@@ -3,7 +3,7 @@ BASH := $(SHELL)
 SCIEBO := bin/sciebo
 VERSION := $(shell cat VERSION 2>/dev/null)
 PREFIX ?= $(HOME)/.local
-DIST_NAME := rclone-sciebo-$(VERSION)
+DIST_NAME := rclone-webdav-sync-$(VERSION)
 DIST_DIR ?= dist
 
 # shellcheck runs twice. Production code is checked with -x, following every

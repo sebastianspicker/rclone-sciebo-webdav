@@ -86,12 +86,12 @@ DIST_OUT_DIR="${PREFIX_DIR}/dist-out"
 dist_out="$( (cd "$PROJ" && make -f Makefile dist DIST_DIR="$DIST_OUT_DIR" 2>&1) )"
 dist_rc=$?
 dist_ver="$(tr -d '[:space:]' <"${PROJ}/VERSION")"
-tarball="${DIST_OUT_DIR}/rclone-sciebo-${dist_ver}.tar.gz"
+tarball="${DIST_OUT_DIR}/rclone-webdav-sync-${dist_ver}.tar.gz"
 expect_rc "dist: rc 0" "$dist_rc" 0
 expect_contains "dist: prints the wrote-tarball line" "$dist_out" "wrote ${DIST_OUT_DIR}/"
 expect_file "dist: tarball written" "$tarball"
 listing="$(tar -tzf "$tarball" 2>/dev/null)"
-prefix="rclone-sciebo-${dist_ver}"
+prefix="rclone-webdav-sync-${dist_ver}"
 expect_contains "dist: contains bin/sciebo" "$listing" "${prefix}/bin/sciebo"
 expect_contains "dist: contains lib/sciebo.sh" "$listing" "${prefix}/lib/sciebo.sh"
 case $'\n'"$listing"$'\n' in

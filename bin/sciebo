@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sciebo - single entrypoint for the rclone-sciebo tooling.
+# sciebo - the single entrypoint of rclone-webdav-sync (the `sciebo` command).
 #
 # Requires Bash 5.3 or newer: modules use associative arrays, mapfile, namerefs,
 # case conversion, forkless command substitution, and BASH_MONOSECONDS. macOS
