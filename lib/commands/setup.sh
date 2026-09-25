@@ -696,7 +696,7 @@ setup_print_summary() {
   shown_url="${ printable "$url";}"
   printf '  url:    %s\n  user:   %s\n  config: %s\n' "$shown_url" "$user" "$RCLONE_CONFIG"
   if [[ "$use_keychain" -eq 1 ]]; then
-    printf '  password: Keychain (%s, %s)\n' "$KEYCHAIN_SERVICE" "$(keychain_account)"
+    printf '  password: Keychain (%s, %s)\n' "$KEYCHAIN_SERVICE" "$(keychain_account_plain)"
   else
     printf '  password: rclone config (obscured)\n'
   fi

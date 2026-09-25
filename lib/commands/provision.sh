@@ -197,7 +197,7 @@ provision_print_summary() {
   log "provisioned profile '$(printable "$profile")'"
   printf '  remote: %s:\n  server: %s\n' "$RCLONE_REMOTE" "$url"
   if [[ "$use_keychain" -eq 1 ]]; then
-    printf '  password: Keychain (%s, %s)\n' "$KEYCHAIN_SERVICE" "$(keychain_account)"
+    printf '  password: Keychain (%s, %s)\n' "$KEYCHAIN_SERVICE" "$(keychain_account_plain)"
   else
     printf '  password: rclone config (obscured)\n'
   fi

@@ -1,6 +1,17 @@
 # Contributing
 
-Thanks for stopping by. Bug reports, ideas, and pull requests are all welcome.
+Thanks for stopping by. Bug reports, ideas, and pull requests are all
+welcome.
+
+This document is for a contributor about to open a pull request. Contributing
+looks like this end to end: set up the toolchain below, follow the rules in
+[What this codebase cares about](#what-this-codebase-cares-about), find the
+right layer for your change in [Where code goes](#where-code-goes), then run
+the checklist in [Before you open a pull request](#before-you-open-a-pull-request).
+"sciebo" here is this project's CLI, not the sciebo cloud service for NRW's
+universities that the CLI happens to be named after; the tool works with any
+Nextcloud server.
+<!-- src: CONTRIBUTING.md -->
 
 ## Getting set up
 
@@ -11,6 +22,7 @@ repository and run `bin/sciebo` straight from the checkout. `make lint` needs
 `shellcheck` and `shfmt` and fails without them; set `LINT_ALLOW_MISSING=1`
 to skip an absent linter locally (CI never does). `python3` is optional
 (screenshot tool and a syntax check). None of these are runtime dependencies.
+<!-- src: CONTRIBUTING.md#getting-set-up -->
 
 ## What this codebase cares about
 
@@ -19,12 +31,12 @@ to skip an absent linter locally (CI never does). `python3` is optional
   below 5.3, and `make lint`'s `check-bash` target does the same for the
   bash used to run the tooling.
 - **No new dependencies.** The runtime is bash, rclone, and curl, used by the
-  Login Flow, the capabilities probe, and the read-only `trash`/`versions`
-  listings. Optional tools (`fzf`, linters) must stay optional, and there is
-  no build step.
+  browser sign-in flow (Login Flow), the capabilities probe, and the
+  read-only `trash`/`versions` listings. Optional tools (`fzf`, linters)
+  must stay optional, and there is no build step.
 - **Commands stay independent.** Command modules return a status instead of
   calling each other; only `die` (exit 1) and `usage_error` (exit 2) exit
-  directly. A command that needs another spawns `bin/sciebo`, it does not
+  directly. A command that needs another spawns `bin/sciebo`; it does not
   call it as a function.
 - **New server-API commands start as extras.** A command that wraps a
   Nextcloud server feature is added with tier `extra` in
@@ -33,7 +45,8 @@ to skip an absent linter locally (CI never does). `python3` is optional
   it. `make lint` checks the two lists agree.
 - **Credentials never get committed.** `.env` and
   `config/settings.local.env` are gitignored. Keep them that way, and don't
-  paste real credentials or private sciebo URLs into issues.
+  paste real credentials or private sciebo (service) URLs into issues.
+<!-- src: CONTRIBUTING.md#what-this-codebase-cares-about -->
 
 ## Where code goes
 
@@ -44,6 +57,7 @@ subcommand). A lower layer never sources a higher one; `scripts/check-layers.sh`
 (part of `make lint`) enforces the order. See
 [docs/architecture.md](docs/architecture.md) for the full module map and for
 how to add a new command.
+<!-- src: CONTRIBUTING.md#where-code-goes -->
 
 ## Before you open a pull request
 
@@ -58,6 +72,7 @@ make test-one T=NAME   # run a single unit/feature test script by name
 The unit tests only exercise libraries. The integration tests need `rclone`
 and run the whole CLI against a throwaway `local` remote in a temp directory;
 they never touch a real remote, your configuration, or launchd/systemd.
+<!-- src: CONTRIBUTING.md#before-you-open-a-pull-request -->
 
 ## Screenshots
 
@@ -70,6 +85,7 @@ make screenshots   # sandboxed run; writes docs/assets/screenshots/*.svg
 
 This uses `rclone` and `python3` and talks to a temporary `local` remote, so
 your real sciebo account is never involved.
+<!-- src: CONTRIBUTING.md#screenshots -->
 
 ## Shell completions
 
@@ -78,12 +94,14 @@ your real sciebo account is never involved.
 also generates `lib/cli/registry.sh`); edit the spec, then run `make gen` to
 regenerate all four. `make lint` fails if the committed files drift from the
 spec.
+<!-- src: CONTRIBUTING.md#shell-completions -->
 
 ## Git hooks (optional)
 
 `make hooks` opts into a repo pre-commit hook (`.githooks/pre-commit`) that
 runs `shfmt` and `shellcheck` on staged files. It's optional; `make lint`
 still runs everything before a merge either way.
+<!-- src: CONTRIBUTING.md#git-hooks-optional -->
 
 ## Style
 
@@ -93,3 +111,24 @@ still runs everything before a merge either way.
 - Run `make lint` before pushing; it is the formatting authority.
 - Update the docs when behavior changes. If a claim in the README stops being
   true, that is a bug too.
+<!-- src: CONTRIBUTING.md#style -->
+
+## Limitations
+
+This document states process rules, not a formal style guide: what it lists
+above is what this codebase's reviewers check for, not an exhaustive style
+manual. The one rule that applies to this document too: if a claim in the
+README (or in this file) stops being true, that is a bug, and the fix
+includes updating the docs, not only the code.
+<!-- src: CONTRIBUTING.md#style -->
+
+## Glossary
+
+| Term | Meaning |
+| --- | --- |
+| sciebo (the CLI) | This project's command-line program; usable with any Nextcloud server, not only the sciebo service. |
+| sciebo (the service) | The Nextcloud-based cloud storage service for NRW's universities; a third party, not part of this project. |
+| Nextcloud | The open-source server software the sciebo service and other institutions run. |
+| rclone | The third-party file-transfer engine sciebo is built on. |
+| layer | One of seven ordered internal code groupings (from basic helpers up to individual commands); lower layers never depend on higher ones. |
+| tier (core / extra) | `core` commands are covered by tests against a real Nextcloud server; `extra` commands are newer and tested only against a local stand-in. |
