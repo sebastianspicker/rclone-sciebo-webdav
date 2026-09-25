@@ -144,8 +144,9 @@ support_stat_mtime_name() {
 support_sort_capped() {
   local list="$1" limit="$2"
   local -a lines=()
-  mapfile -t -n "$limit" lines < <(printf '%s' "$list" | LC_ALL=C sort -rn)
-  printf '%s\n' "${lines[@]}" | sed 's/^[0-9][0-9]* //'
+  # Read everything, then slice (see recent_sorted): no early pipe close.
+  mapfile -t lines < <(printf '%s' "$list" | LC_ALL=C sort -rn)
+  printf '%s\n' "${lines[@]:0:$limit}" | sed 's/^[0-9][0-9]* //'
 }
 
 # support_newest_files DIR LIMIT - print up to LIMIT regular files from DIR,

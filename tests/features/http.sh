@@ -114,7 +114,7 @@ expect_eq "xml_fields: valid UTF-8 survives" "grüße€😀" \
 # xml_href_segment: byte-wise percent decode (utf-8 survives), control dropped.
 pct_xml='<d:response><d:href>/remote.php/dav/files/alice/F%C3%B6o%20b.txt</d:href></d:response>'
 expect_eq "xml_href_segment: decoded last segment" "Föo b.txt" \
-  "$(printf '%s' "$pct_xml" | awk -v tag=d:response "${_AWK_XML_LIB}"'{doc=doc $0} END{rest=doc; while((pos=index(rest,"<"tag))>0){after=substr(rest,pos+1+length(tag));gt=index(after,">");body=substr(after,gt+1);cend=index(body,"</"tag);print xml_href_segment(substr(body,1,cend-1));rest=substr(body,cend+length(tag)+2)}}')"
+  "$(printf '%s' "$pct_xml" | LC_ALL=C awk -v tag=d:response "${_AWK_XML_LIB}"'{doc=doc $0} END{rest=doc; while((pos=index(rest,"<"tag))>0){after=substr(rest,pos+1+length(tag));gt=index(after,">");body=substr(after,gt+1);cend=index(body,"</"tag);print xml_href_segment(substr(body,1,cend-1));rest=substr(body,cend+length(tag)+2)}}')"
 
 # --- http helpers without curl -------------------------------------------
 HTTP_CODE=404

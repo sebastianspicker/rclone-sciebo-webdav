@@ -24,6 +24,8 @@ dir="$(cd "$(dirname "$0")" && pwd)"
 exit 0
 STUB
 chmod +x "${NOTIFY_BIN}/osascript"
+# These cases exercise the macOS backend through the stub on any host.
+PLATFORM_OS=macos
 saved_path="$PATH"
 saved_notify="${NOTIFY:-0}"
 PATH="${NOTIFY_BIN}:$PATH"

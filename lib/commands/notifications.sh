@@ -283,7 +283,7 @@ notifications_notify() {
 # nested walk reuses the same awk buffers, so nested <element> wrappers stay
 # inside their parent block.
 notifications_action_records() {
-  printf '%s' "$1" | awk "${_AWK_XML_LIB}"'
+  printf '%s' "$1" | LC_ALL=C awk "${_AWK_XML_LIB}"'
     function notif_action(id, nid, block) {
       printf "%s\t%s\t%s\t%s\t%s\t%s\n", id, nid, xml_extract(block, "label"), xml_extract(block, "method"), xml_extract(block, "type"), xml_extract(block, "link")
     }

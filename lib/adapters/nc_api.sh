@@ -417,7 +417,7 @@ nc_policy_propfind() {
     IFS=,
     printf '%s' "$*"
   )"
-  records="$(printf '%s' "$HTTP_BODY" | awk -v props="$props_csv" "${_AWK_XML_LIB}"'
+  records="$(printf '%s' "$HTTP_BODY" | LC_ALL=C awk -v props="$props_csv" "${_AWK_XML_LIB}"'
     { doc = doc $0 }
     END {
       n = split(props, parr, ",")

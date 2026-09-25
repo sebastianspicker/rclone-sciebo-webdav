@@ -16,6 +16,9 @@
 #      `: "${VAR:=...}"` defaults.
 #   5. Top-level array declarations are global (`declare -gA`/`-ga`), so a
 #      module behaves the same whichever scope sources it.
+#   6. awk programs built on the shared byte-oriented preludes
+#      (_AWK_CTRL_LIB, _AWK_HTML_LIB, _AWK_XML_LIB) run under LC_ALL=C; in a
+#      UTF-8 locale gawk turns decoded bytes into characters.
 set -euo pipefail
 
 ROOT="$(cd "${BASH_SOURCE[0]%/*}/.." && pwd)"
@@ -126,4 +129,13 @@ END {
   echo "check-layers: violations found (see docs/architecture.md#layers)" >&2
   exit 1
 }
+# Rule 6: a line that runs awk with one of the shared preludes must set
+# LC_ALL=C on that command (comment lines excluded).
+prelude_violations="$(grep -nE 'awk[^|]*"\$\{_AWK_(CTRL|HTML|XML)_LIB\}' "${files[@]}" lib/sciebo.sh |
+  grep -vE '^[^:]+:[0-9]+:[[:space:]]*#' | grep -v 'LC_ALL=C awk' || true)"
+if [[ -n "$prelude_violations" ]]; then
+  printf '%s\n' "$prelude_violations" | sed 's/$/  <- rule 6: run shared awk preludes under LC_ALL=C/' >&2
+  echo "check-layers: violations found (see docs/architecture.md#layers)" >&2
+  exit 1
+fi
 echo "check-layers: ${#files[@]} files, no violations"

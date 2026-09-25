@@ -82,7 +82,7 @@ printable() {
 # `out = out c`. Under a UTF-8 locale, regex and split reject the invalid
 # bytes this function exists to remove (BWK awk: "multibyte conversion
 # failure"), so ctrl_strip falls back to a regex-free byte scan. Compose as
-# `awk "${_AWK_CTRL_LIB}"'<program>'`; sanitize_stream and the HTTP scrubbers
+# `LC_ALL=C awk "${_AWK_CTRL_LIB}"'<program>'`; sanitize_stream and the HTTP scrubbers
 # pass LC_ALL=C for the fast path.
 _AWK_CTRL_LIB='
 function ctrl_build(    i) {
@@ -105,6 +105,14 @@ function ctrl_build(    i) {
   ctrl_lead_f4 = sprintf("%c", 244)
   ctrl_bad_high = sprintf("%c%c", 192, 193)
   for (i = 245; i <= 255; i++) ctrl_bad_high = ctrl_bad_high sprintf("%c", i)
+  # Byte-range regexes are kept as strings (dynamic regexes) rather than
+  # /.../ literals: gawk compiles literals when it parses the program and, in
+  # a UTF-8 locale, rejects these byte ranges ("Invalid collation character")
+  # before ctrl_in_c_locale can route around them. They are only used in C.
+  ctrl_re_c0_keep = "[\001-\010\013-\037\177]"
+  ctrl_re_c0_all = "[\001-\037\177]"
+  ctrl_re_c1 = "\302[\200-\237]"
+  ctrl_re_high = "[\200-\377]"
 }
 # ctrl_in_c_locale() - true when awk runs with byte semantics, so the
 # regex/split fast path is safe. POSIX awk derives its locale from LC_ALL,
@@ -174,10 +182,10 @@ function ctrl_strip_bytes(s, keep_tab_lf,    i, n, c, start, out, need, j, b2, o
 function ctrl_strip(s, keep_tab_lf,    i, n, a, c, start, out, need, j, b2, ok) {
   ctrl_build()
   if (!ctrl_in_c_locale()) return ctrl_strip_bytes(s, keep_tab_lf)
-  if (keep_tab_lf == 1) gsub(/[\001-\010\013-\037\177]/, "", s)
-  else gsub(/[\001-\037\177]/, "", s)
-  gsub(/\302[\200-\237]/, "", s)
-  if (s !~ /[\200-\377]/) return s
+  if (keep_tab_lf == 1) gsub(ctrl_re_c0_keep, "", s)
+  else gsub(ctrl_re_c0_all, "", s)
+  gsub(ctrl_re_c1, "", s)
+  if (s !~ ctrl_re_high) return s
   n = split(s, a, "")
   out = ""
   start = 1
@@ -441,7 +449,7 @@ href_last_segment() {
 }
 
 # _AWK_HTML_LIB - the shared awk HTML stripper, composed as
-# `awk "${_AWK_HTML_LIB}"'<program>'` the same way core's _AWK_CTRL_LIB and
+# `LC_ALL=C awk "${_AWK_HTML_LIB}"'<program>'` the same way core's _AWK_CTRL_LIB and
 # http.sh's _AWK_XML_LIB compose (http.sh prepends this lib to
 # _AWK_XML_LIB, so the XML parsers call xml_html_strip from one source).
 # xml_html_strip(s) removes <...> markup, folds whitespace runs to single
@@ -466,7 +474,7 @@ function xml_html_strip(s,    text) {
 # the inline END block this replaced. Callers that print the result to a
 # terminal must still run it through printable.
 strip_html() {
-  printf '%s' "$1" | awk "${_AWK_HTML_LIB}"'
+  printf '%s' "$1" | LC_ALL=C awk "${_AWK_HTML_LIB}"'
     { text = text $0 " " }
     END { print xml_html_strip(text) }
   '

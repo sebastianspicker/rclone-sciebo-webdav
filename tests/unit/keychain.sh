@@ -7,6 +7,11 @@ set -uo pipefail
 # shellcheck source=common.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
+# These cases exercise the macOS `security` backend through a stub, so they
+# pin the platform instead of probing the host (Linux would pick
+# secret-tool/pass).
+PLATFORM_OS=macos
+
 # --- keychain (stub `security` in a private bin dir) --------------------
 # `security` is resolved through PATH, so a stub only exists for the calls
 # made while PATH points at it. The stub records each argv line and keeps

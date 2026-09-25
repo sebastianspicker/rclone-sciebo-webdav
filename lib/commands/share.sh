@@ -730,7 +730,7 @@ share_pending_print_json() {
 # come from one awk pass and split on TAB like ocs_parse.
 share_result_parse() {
   local body="$1" parsed="" tab=$'\t' token=""
-  parsed="$(printf '%s' "$body" | awk "${_AWK_XML_LIB}"'
+  parsed="$(printf '%s' "$body" | LC_ALL=C awk "${_AWK_XML_LIB}"'
     { doc = doc $0 }
     END { printf "%s\t%s\t%s", xml_extract(doc, "id"), xml_extract(doc, "url"), xml_extract(doc, "token") }
   ')"

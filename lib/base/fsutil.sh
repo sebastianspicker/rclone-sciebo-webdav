@@ -273,7 +273,12 @@ _safe_source_open_checked() {
   if [[ "$_SCIEBO_STAT_FLAVOR" == "bsd" ]]; then
     out="$(stat -f '%u %Lp %i' "/dev/fd/${fd}" "$file" 2>/dev/null || true)"
   else
-    out="$(stat -c '%u %a %i' "/dev/fd/${fd}" "$file" 2>/dev/null || true)"
+    # On Linux /dev/fd/N is a symlink into /proc, and GNU stat does not
+    # follow symlinks by default: without -L it reports the link itself (a
+    # different inode), so the inode check below could never pass. Follow
+    # only the descriptor; the path is still examined without following.
+    out="$(stat -L -c '%u %a %i' "/dev/fd/${fd}" 2>/dev/null || true)"
+    out+=$'\n'"$(stat -c '%u %a %i' "$file" 2>/dev/null || true)"
   fi
   read -r fd_uid fd_mode fd_ino <<<"${out%%$'\n'*}"
   if [[ "$out" == *$'\n'* ]]; then

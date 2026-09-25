@@ -47,8 +47,10 @@ recent_parse() {
 # otherwise fail this on large listings once `head` closed the pipe early).
 recent_sorted() {
   local -a lines=()
-  mapfile -t -n "$2" lines < <(printf '%s\n' "$1" | sort -r)
-  printf '%s\n' "${lines[@]}"
+  # Read everything and slice afterwards: stopping after N lines would close
+  # the pipe on sort, which GNU sort reports as "write error" on stderr.
+  mapfile -t lines < <(printf '%s\n' "$1" | sort -r)
+  printf '%s\n' "${lines[@]:0:$2}"
 }
 
 # recent_print_text PARSED LIMIT - the MODIFIED/SIZE/PATH table.

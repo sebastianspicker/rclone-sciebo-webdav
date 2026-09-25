@@ -265,6 +265,17 @@
         <p>A launchd agent (macOS) or systemd <code>--user</code> agent (Linux) runs a quiet sync daily, on an interval, with jitter, or when a watched path changes. On demand, <code>sciebo mount</code> exposes the remote as a filesystem via <code>nfsmount</code> — no macFUSE on macOS, and the kernel NFS client on Linux (usually root).</p>
       </div>
     </div>
+    <h3>Compared with nextcloudcmd</h3>
+    <ul class="checks">
+      <li><code>nextcloudcmd</code>, bundled with the desktop client, runs one sync of one folder and exits; <code>sciebo sync</code> covers every configured pair, and <code>watch</code> / <code>schedule install</code> add opt-in live or periodic runs.</li>
+      <li>Needs only bash, rclone, and curl, not the desktop client packages.</li>
+      <li>Keeps credentials out of the process list: platform keychain, a netrc temp file, or <code>--password-fd</code> for <code>sciebo nextcloudcmd</code>, instead of <code>-p PASSWORD</code> on the command line.</li>
+      <li>Adds a dry-run <code>check</code>, a delete guard, and local conflict copies, none of which nextcloudcmd's manual documents.</li>
+      <li><code>sciebo nextcloudcmd</code> accepts nextcloudcmd's own option names, and <code>scripts/nextcloudcmd</code> is a drop-in shim for existing cron jobs.</li>
+    </ul>
+    <p class="lede" style="margin-top:12px;font-size:13.5px">
+      Full comparison in the <a href="https://github.com/sebastianspicker/rclone-sciebo-webdav#compared-with-nextcloudcmd">README</a>, based on the <a href="https://docs.nextcloud.com/server/stable/user_manual/en/desktop/commandline.html">Nextcloud user manual</a>.
+    </p>
   </div>
 </section>
 
@@ -362,6 +373,9 @@ bin/sciebo status           <span class="c"># last run per source</span>
       <a href="https://github.com/sebastianspicker/rclone-sciebo-webdav/blob/main/LICENSE">MIT license</a>
     </span>
     <span>Built for sciebo; works with any Nextcloud instance. Screenshots: <code>make screenshots</code></span>
+  </div>
+  <div class="wrap" style="margin-top:12px">
+    <span style="color:var(--muted);font-size:13px">Independent project, not affiliated with, endorsed by, or supported by Nextcloud GmbH or the sciebo service operators. Nextcloud and sciebo are trademarks/names of their respective owners.</span>
   </div>
 </footer>
 

@@ -54,7 +54,7 @@ spawns `bin/sciebo` instead.
 | cli | `lib/cli/` | process entry: the generated registry (`registry.sh`); global options, dispatch, help, traps (`main.sh`); version banner (`version.sh`) | base, adapters, config, state, sync |
 | commands | `lib/commands/` | one file per command group, e.g. `setup.sh`, `sync.sh`, `folders.sh` | every layer below; never another command module |
 
-`scripts/check-layers.sh` (rules 1-5 in its header) enforces this statically
+`scripts/check-layers.sh` (rules 1-6 in its header) enforces this statically
 in `make lint` by parsing function definitions and by-name calls across
 `lib/`: it catches a call to a higher layer, a command module calling
 another command module, a library sourced from anywhere but
@@ -63,7 +63,9 @@ reading a user settings file, and the command-module dispatch in
 `lib/cli/main.sh`), a source-time settings default in a
 library, and a top-level array declared without `-g`. Names built at
 runtime (`cmd_$name`) are invisible to it by design - documented dispatch,
-not a violation.
+not a violation. It also requires awk programs built on the shared byte-oriented
+preludes (`_AWK_CTRL_LIB`, `_AWK_HTML_LIB`, `_AWK_XML_LIB`) to run under
+`LC_ALL=C`: in a UTF-8 locale gawk turns decoded bytes into characters.
 
 Where new code goes: a pure helper with no knowledge of settings or the
 network goes in `base`; something that shells out or talks to a service goes
@@ -474,7 +476,12 @@ user/activity/search/shares/notifications, `/__test__/` seed hooks);
 `make lint` runs shellcheck, shfmt, `scripts/check-layers.sh`,
 `scripts/gen-cli.sh --check`, `DRIFT_STRICT=1 scripts/check-drift.sh`, and a
 `py_compile` check of `tools/screenshots.py`/`tests/fake_server.py` (a
-missing linter fails unless `LINT_ALLOW_MISSING=1`). `check-drift.sh` checks
+missing linter fails unless `LINT_ALLOW_MISSING=1`). shellcheck runs in two
+passes: production code with `-x`, following sources into `lib/`, and tests
+without following, because each test sources the whole library and `-x`
+would re-analyze all of `lib/` per test file; the test pass excludes only the
+codes that need the library's view (SC1091, SC2154, SC2034, SC2329).
+`check-drift.sh` checks
 the implementation against the spec/registry - every command has a matching
 `usage_<name>`/`cmd_<name>` pair and man page section, every settings key
 `settings.sh` requires exists in `settings.env`, and, under `DRIFT_STRICT`,

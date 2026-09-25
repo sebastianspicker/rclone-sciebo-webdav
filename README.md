@@ -25,6 +25,12 @@ What it does:
 - Runs as a plain CLI with no daemon. `sciebo watch` and `sciebo schedule
   install` add an always-on path, but only if you opt in.
 
+## Not affiliated with Nextcloud or sciebo
+
+This is an independent project. It is not affiliated with, endorsed by, or
+supported by Nextcloud GmbH or the sciebo service operators; Nextcloud and
+sciebo are trademarks/names of their respective owners.
+
 ## Screenshot tour
 
 Every image below is real CLI output, captured against a temporary local
@@ -239,6 +245,64 @@ bin/sciebo schedule install --at-login --profiles work,home
 `schedule install --at-login` installs a launchd or systemd `--user` agent
 that runs `sync --apply --quiet` periodically, one agent per profile with
 `--profiles`. Nothing runs in the background unless you start or install it.
+
+## Compared with nextcloudcmd
+
+[`nextcloudcmd`](https://docs.nextcloud.com/server/stable/user_manual/en/desktop/commandline.html)
+ships with the Nextcloud desktop client packages (Alpine, Debian, Fedora,
+Ubuntu, the Ubuntu PPA, and Windows). Per its manual, it "performs a single
+sync run and then exits": it does not repeat synchronizations on its own and
+does not monitor for file system changes. One invocation syncs one local
+folder against one remote location (`--path` picks a server subfolder). It
+is the right tool when you already run the desktop client packages and want
+one folder synced on demand or from a script.
+
+| | `nextcloudcmd` | `sciebo` |
+| --- | --- | --- |
+| Trigger | one-shot; you re-run it yourself or from cron | `sync` for one-shot, opt-in `watch` for live sync, `schedule install` for periodic runs |
+| Folders per run | one local folder, one remote location (`--path`) | every pair in the manifest, each with its own `sync`/`pull`/`bisync` |
+| Dependencies | the desktop client packages | bash, rclone, curl |
+| Credentials | `-p PASSWORD` on the command line (visible to other local users via `ps`), `-n` netrc, or `--non-interactive` with `$NC_USER`/`$NC_PASSWORD` | platform keychain by default, handed to curl through a private netrc temp file; `sciebo nextcloudcmd` also takes `--password-fd` and keeps `-p` only for drop-in compatibility |
+| Selective sync | `--unsyncedfolders FILE` | `folders choose` picker, plus per-pair include/exclude filters |
+| Server features | out of scope for the manual (shares, notifications, locks, trash, versions, ...) | `share`, `trash`, `versions`, `notifications`, `locks`, `quota`, `comments`, `tags`, and more |
+| Safety | `--max-sync-retries`; the manual documents no dry run or delete guard | dry-run `check`, a delete guard (`DELETE_FILES_THRESHOLD`), local conflict copies, `pause`/`resume` |
+| Migration | — | `sciebo nextcloudcmd` accepts `nextcloudcmd`'s own option names; `scripts/nextcloudcmd` is a drop-in shim for existing cron jobs |
+
+If you already run the desktop client packages and only need one folder
+synced from a script or cron job, `nextcloudcmd` stays the simpler choice:
+it needs nothing beyond the client itself. If you want the desktop client's
+other behavior (several folders, shares, scheduled or live sync) on a
+machine without a desktop session, `sciebo` trades that simplicity for
+three command-line dependencies instead of the client packages.
+
+## The desktop client, in the shell
+
+The table below maps the desktop client's day-to-day features onto
+commands; the full parity matrix, including its documented gaps, is in
+[docs/parity.md](docs/parity.md).
+
+| Desktop client feature | sciebo command |
+| --- | --- |
+| Account setup (Login Flow / app password) | `setup --login`, `setup` |
+| Choosing which folders sync | `folders choose` |
+| Live sync on file changes | `watch` (opt-in, foreground) |
+| Periodic or start-at-login sync | `schedule install --at-login` |
+| Sync status and history | `status`, `logs`, `activity` |
+| Pause syncing | `pause`, `resume` |
+| Conflict handling | `conflicts` |
+| Desktop notifications | `notifications`, the `NOTIFY` setting |
+| Sharing | `share` |
+| On-demand / virtual files | `mount`, `hydrate`, `download` |
+| Multiple accounts | `account`, the global `--profile` flag |
+| Bandwidth limits | `limit`, `unlimited` |
+| Metered-network handling | `network`, `METERED_POLICY` |
+
+`sciebo` is a CLI, not a GUI: there is no tray icon, and nothing adds a
+sync-state overlay to Finder or Explorer. Virtual files are approximated,
+not replicated: `mount` exposes the remote as an on-demand filesystem via
+`rclone nfsmount`, and `hydrate`/`edit` fetch one path or file explicitly;
+[docs/parity.md](docs/parity.md#not-implementable) lists what a platform
+file-provider extension would still be needed for.
 
 ## Commands
 

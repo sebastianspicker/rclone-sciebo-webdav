@@ -71,7 +71,7 @@ activity_api_path() {
 # shared xml_html_strip (_AWK_HTML_LIB composed into _AWK_XML_LIB),
 # replacing a fork per field.
 activity_parse_xml() {
-  printf '%s' "$1" | awk "${_AWK_XML_LIB}"'
+  printf '%s' "$1" | LC_ALL=C awk "${_AWK_XML_LIB}"'
     { doc = doc $0 }
     END {
       gsub(/\r/, "", doc)

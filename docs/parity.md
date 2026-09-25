@@ -11,6 +11,13 @@ Three groups:
 2. [Implementable but not yet done](#implementable-but-not-yet-done)
 3. [Not implementable](#not-implementable)
 
+See the README's [comparison with
+`nextcloudcmd`](../README.md#compared-with-nextcloudcmd) for how this differs
+from the desktop client's single-shot command-line sync, and the
+[non-affiliation note](../README.md#not-affiliated-with-nextcloud-or-sciebo):
+this project is independent and not affiliated with, endorsed by, or
+supported by Nextcloud GmbH or the sciebo service operators.
+
 ## Parity implemented
 
 | Desktop client feature | sciebo equivalent | Notes |

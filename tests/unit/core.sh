@@ -424,6 +424,15 @@ else
   fail "sanitize_stream: 1MB line scales linearly" "${big_ratio}x the 64KB time (${big_us}us vs ${small_us}us)"
 fi
 
+# The awk preludes must parse in any locale: gawk compiles regex literals at
+# parse time and, in a UTF-8 locale, rejects byte ranges such as \302[...].
+# Runs wherever gawk exists (GitHub's Linux runners); skipped otherwise.
+if command -v gawk >/dev/null 2>&1; then
+  gawk_out="$(printf 'a\001<b>x</b>\n' | LC_ALL=C.UTF-8 gawk "${_AWK_XML_LIB}"'{ print ctrl_strip($0, 1) }' 2>&1)"
+  expect_eq "awk preludes: parse under gawk in a UTF-8 locale" "0" "$?"
+  expect_not_contains "awk preludes: no collation error under gawk" "$gawk_out" "collation"
+fi
+
 # --- url_redact_userinfo -------------------------------------------------
 expect_eq "url_redact_userinfo: masks embedded credentials" \
   "https://***@example.com/path" "$(url_redact_userinfo 'https://user:pass@example.com/path')"

@@ -133,6 +133,9 @@ dir="$(cd "$(dirname "$0")" && pwd)"
 exit 0
 STUB
 chmod +x "${NOTIFY_BIN}/osascript"
+# Exercise the macOS notification backend through the stub on any host.
+sync_saved_platform_os="$PLATFORM_OS"
+PLATFORM_OS=macos
 saved_path="$PATH"
 PATH="${NOTIFY_BIN}:$PATH"
 SYNC_APPLY=true SYNC_TOTAL=2 SYNC_FAILED=0 SYNC_OK=2 SYNC_CONFLICTS=1
@@ -158,6 +161,7 @@ SYNC_FAILED_NAMES=$'broken\n'
 sync_notify
 expect_contains "sync_notify: failure notification beats conflicts" "$(cat "${NOTIFY_BIN}/calls.log")" "sciebo sync failed"
 expect_contains "sync_notify: failure notification names the source" "$(cat "${NOTIFY_BIN}/calls.log")" "broken"
+PLATFORM_OS="$sync_saved_platform_os"
 PATH="$saved_path"
 SYNC_APPLY=false SYNC_TOTAL=0 SYNC_FAILED=0 SYNC_OK=0 SYNC_CONFLICTS=0 SYNC_FAILED_NAMES=""
 NOTIFY=0 NOTIFY_SUCCESS=0

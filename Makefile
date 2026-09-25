@@ -5,6 +5,16 @@ VERSION := $(shell cat VERSION 2>/dev/null)
 PREFIX ?= $(HOME)/.local
 DIST_NAME := rclone-sciebo-$(VERSION)
 DIST_DIR ?= dist
+
+# shellcheck runs twice. Production code is checked with -x, following every
+# source into lib/. Tests are checked without following: each one sources the
+# whole library through lib/sciebo.sh, so -x would re-analyze all of lib/ once
+# per test file (minutes instead of seconds). The excluded codes are exactly
+# the ones that need the library's view: globals it assigns (SC2154) or reads
+# (SC2034), stubs it calls (SC2329), and the unfollowed source (SC1091).
+SC_PROD = $(SCIEBO) .githooks/pre-commit $(wildcard .claude/hooks/*.sh) completions/sciebo.bash scripts/*.sh lib/*.sh lib/*/*.sh
+SC_TESTS = tests/*.sh tests/unit/*.sh tests/contract/*.sh tests/features/*.sh
+SC_TEST_EXCLUDES = SC1091,SC2154,SC2034,SC2329
 # CODE_ITEMS: shipped code/assets that install/uninstall replace wholesale.
 # config/ and state/ are deliberately not here: they hold the user's data and
 # are handled on their own (never deleted, never clobbered on upgrade).
@@ -94,8 +104,10 @@ check-bash: ## fail fast unless the selected bash is 5.3+
 lint: check-bash ## shellcheck + shfmt + layers/drift guards (LINT_ALLOW_MISSING=1 skips absent linters)
 	@status=0; \
 	if command -v shellcheck >/dev/null 2>&1; then \
-	  echo "shellcheck -x -P SCRIPTDIR bin/sciebo .githooks/pre-commit $(wildcard .claude/hooks/*.sh) completions/sciebo.bash scripts/*.sh tests/*.sh tests/unit/*.sh tests/contract/*.sh tests/features/*.sh lib/*.sh lib/*/*.sh"; \
-	  shellcheck -x -P SCRIPTDIR $(SCIEBO) .githooks/pre-commit $(wildcard .claude/hooks/*.sh) completions/sciebo.bash scripts/*.sh tests/*.sh tests/unit/*.sh tests/contract/*.sh tests/features/*.sh lib/*.sh lib/*/*.sh || status=1; \
+	  echo "shellcheck -x -P SCRIPTDIR $(SC_PROD)"; \
+	  shellcheck -x -P SCRIPTDIR $(SC_PROD) || status=1; \
+	  echo "shellcheck -P SCRIPTDIR -e $(SC_TEST_EXCLUDES) $(SC_TESTS)"; \
+	  shellcheck -P SCRIPTDIR -e $(SC_TEST_EXCLUDES) $(SC_TESTS) || status=1; \
 	elif [ -n "$(LINT_ALLOW_MISSING)" ]; then \
 	  echo "WARN: shellcheck not found; skipping shellcheck (LINT_ALLOW_MISSING)" >&2; \
 	else \
