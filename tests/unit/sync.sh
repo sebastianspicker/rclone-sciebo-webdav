@@ -19,11 +19,7 @@ sync_args_probe() {
   # shellcheck disable=SC2016  # the -c program expands "$1" itself
   env "SYNC_PROBE_MODE=$mode" "$@" bash -c '
     set -uo pipefail
-    source "$1/lib/core.sh"
-    source "$1/lib/rclone.sh"
-    source "$1/lib/settings.sh"
-    source "$1/lib/manifest.sh"
-    source "$1/lib/ui.sh"
+    source "$1/lib/sciebo.sh"
     source "$1/lib/commands/sync.sh"
     : "${TRANSFERS:=1}" "${CHECKERS:=4}" "${TPSLIMIT:=8}" "${RETRIES:=3}" "${LOW_LEVEL_RETRIES:=10}"
     : "${TIMEOUT:=10m}" "${CONTIMEOUT:=30s}" "${STATS:=30s}" "${LOG_LEVEL:=INFO}"

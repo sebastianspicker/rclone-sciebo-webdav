@@ -457,8 +457,6 @@ cmd_cleanup() {
   # `sciebo cleanup --help` parses none of them: the state/junk walks go
   # through the manifest, and lock.sh loads before acquire_lock (so the
   # EXIT trap can release it).
-  sciebo_require_module manifest manifest_each
-  sciebo_require_module lock acquire_lock
   load_settings
   ensure_state_dirs
   acquire_lock

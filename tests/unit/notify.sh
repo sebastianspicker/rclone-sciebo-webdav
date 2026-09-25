@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# notify.sh - notification stubs (lib/notify.sh).
+# notify.sh - notification stubs (lib/adapters/notify.sh).
 # Sourced setup lives in tests/unit/common.sh; run standalone with
 # `bash tests/unit/notify.sh`.
 set -uo pipefail

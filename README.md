@@ -1,72 +1,67 @@
 # rclone-sciebo-webdav
 
+[![CI](https://github.com/sebastianspicker/rclone-sciebo-webdav/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastianspicker/rclone-sciebo-webdav/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform: macOS | Linux](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](#requirements)
 [![Bash 5.3+](https://img.shields.io/badge/bash-5.3%2B-blue.svg)](#requirements)
 [![rclone >= 1.69](https://img.shields.io/badge/rclone-%E2%89%A5%201.69-4a90d9.svg)](https://rclone.org)
 
-<!-- Once the repository has a public home, add the CI badge:
-[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
--->
+`sciebo` is a Bash command-line tool that keeps local folders and git
+repositories mirrored to a Nextcloud server over WebDAV, built on top of
+[rclone](https://rclone.org/webdav/). It works with any Nextcloud instance;
+[sciebo](https://www.sciebo.de), the Nextcloud service for NRW's
+universities, is the default target and the tool's namesake.
 
-`rclone-sciebo-webdav` keeps folders and git repositories mirrored to
-[sciebo](https://www.sciebo.de) (or any other Nextcloud server) with
-[rclone](https://rclone.org/webdav/), without clutter, leftover temporary
-files, or surprises.
+What it does:
 
-You choose a direction for every source: upload (`sync`), download (`pull`), or
-two-way (`bisync`). `sciebo check` shows you the plan, `sciebo sync` applies
-it, and a lock makes sure two runs never overlap. `sciebo verify` proves the
-two sides match, and `sciebo status` shows the last run of every source. On
-top of that come the Nextcloud-client-style surface: a folder wizard with
-editable selective sync, git-repo discovery, filters including the server's
-exclude list, `.nosync`, on-demand mounts, `edit`/`hydrate` for single files
-and paths, a "not synced" listing (`ignored`), per-source sync logs (`logs`),
-browser login with keychain storage, shares (link, user, group, email, guest,
-circle, Talk, federated) including pending-share accept/decline, file-drop and
-file-request links, conflict review and
-resolution including local and remote case clashes, notifications with
-filters/actions/watch,
-activity, user status, WebDAV file locks, trash, file versions, quota,
-comments/favorites/tags, and named profiles for multiple accounts. `sciebo
-provision` configures an account non-interactively, `sciebo account import`
-migrates a Nextcloud desktop client `nextcloud.cfg`, `sciebo watch` and
-`sciebo schedule install --at-login` add an opt-in always-on path, `sciebo
-limit` caps bandwidth at runtime, and `sciebo config`, `sciebo network`,
-`sciebo nextcloudcmd`, and `sciebo support` make the setup inspectable,
-scriptable, and supportable.
-
-Desktop-parity policies follow the desktop client's safe defaults: invalid
-names, local case-only collisions, and server-side E2EE folders are excluded,
-external storages and newly picked big folders ask on a terminal (existing
-big folders warn), symlinks are skipped, and an apply that would delete more
-than `DELETE_FILES_THRESHOLD` files stops unless `sync --yes` is given. Remote
-case-only collisions are opt-in (`CASE_CLASH_REMOTE_SCAN=1` during a sync, or
-`conflicts --kind case --remote` on demand). Every policy can be relaxed in
-`config/settings.local.env`.
+- Mirrors each folder in one direction you choose: upload (`sync`), download
+  (`pull`), or two-way (`bisync`). `check` shows the plan as a dry run first.
+- Adds the Nextcloud desktop client's other features as plain commands: a
+  folder wizard, shares, notifications, activity, on-demand mounts, file
+  locks, trash, file versions, quota, and multi-account profiles.
+- Follows the desktop client's safe defaults: invalid names, case clashes,
+  and E2EE folders are excluded by default, and a run that would delete a lot
+  of files stops and asks first.
+- Runs as a plain CLI with no daemon. `sciebo watch` and `sciebo schedule
+  install` add an always-on path, but only if you opt in.
 
 ## Screenshot tour
 
 Every image below is real CLI output, captured against a temporary local
 rclone remote. Regenerate them with `make screenshots`.
 
-Know before you sync:
+**`sciebo help`** — one entrypoint, every command on one screen.
 
-![bin/sciebo doctor --offline](docs/assets/screenshots/doctor.svg)
+![sciebo help](docs/assets/screenshots/help.svg)
 
-Dry-run the whole setup, then apply it for real:
+**`sciebo doctor --offline`** — preflight checks before anything touches the
+network: bash and rclone versions, config sanity, the parity policies.
 
-![bin/sciebo check](docs/assets/screenshots/check.svg)
+![sciebo doctor --offline](docs/assets/screenshots/doctor.svg)
 
-![bin/sciebo sync](docs/assets/screenshots/sync.svg)
+**`sciebo folders choose`** — a Nextcloud-client-style picker: browse the
+remote, multi-select folders, and set a filter for each pair.
 
-See when each source last ran and what it did:
+![sciebo folders choose](docs/assets/screenshots/folders.svg)
 
-![bin/sciebo status](docs/assets/screenshots/status.svg)
+**`sciebo list`** — the sources you ended up with: mode, name, local and
+remote paths, filter.
 
-Prefer a Nextcloud-client-style picker? Browse the remote and add pairs:
+![sciebo list](docs/assets/screenshots/list.svg)
 
-![bin/sciebo folders choose](docs/assets/screenshots/folders.svg)
+**`sciebo check`** — a dry run of the whole setup, with one `plan:` line per
+source and nothing changed yet.
+
+![sciebo check](docs/assets/screenshots/check.svg)
+
+**`sciebo sync`** — the same run, applied. Transfers go to a per-source
+rclone log file.
+
+![sciebo sync](docs/assets/screenshots/sync.svg)
+
+**`sciebo status`** — the last run of every source, and the pause state.
+
+![sciebo status](docs/assets/screenshots/status.svg)
 
 ## Requirements
 
@@ -79,8 +74,8 @@ Prefer a Nextcloud-client-style picker? Browse the remote and add pairs:
   binaries because bisync needs `--resilient`, `--recover`, and
   `--resync-mode`.
 - curl, used for the Login Flow, the capabilities probe, and the direct
-  Nextcloud HTTP/DAV/OCS calls (macOS ships it in `/usr/bin`).
-- A sciebo account.
+  Nextcloud HTTP/DAV/OCS calls.
+- A sciebo account, or any other Nextcloud account.
 - Optional helpers: `fzf` only makes the folder picker nicer; `fswatch`
   (macOS/Linux) or `inotifywait` (Linux) only makes `sciebo watch`
   event-driven, and without either `watch` falls back to portable polling.
@@ -99,23 +94,38 @@ Platform caveats:
 
 ## Install
 
-Run from the checkout, or install it on your `PATH`:
+Clone the repository and run it straight from the checkout, or install it
+onto your `PATH`:
 
 ```sh
-git clone <repo-url> rclone-sciebo-webdav
+git clone https://github.com/sebastianspicker/rclone-sciebo-webdav.git
 cd rclone-sciebo-webdav
 
 bin/sciebo help          # run straight from the checkout
 
 make install             # copies the tree to ~/.local/share/rclone-sciebo
-                         # and writes a ~/.local/bin/sciebo wrapper
+                          # and writes a ~/.local/bin/sciebo wrapper
 make install PREFIX=/usr/local
 make dist                # source tarball: dist/rclone-sciebo-<version>.tar.gz
 ```
 
-`make install` never copies `config/settings.local.env` or `state/` into the
-installation prefix; per-machine overrides and state belong to the checkout
-you run from.
+`make install` leaves your per-machine settings and sync state alone: it
+never writes `config/settings.local.env` or `state/` into the installed
+copy, whether this is a first install or a reinstall over an existing one.
+`make uninstall` mirrors that and keeps `config/` and `state/` under the
+installed prefix (`$PREFIX/share/rclone-sciebo`) so you can remove just the
+code, or copy your settings forward before deleting the rest by hand.
+
+### Shell completions
+
+Completions for bash, zsh, and fish live in `completions/`, generated from
+`lib/cli/sciebo.spec` (`make gen`). Enable the one you use:
+
+| Shell | How |
+| --- | --- |
+| bash | Copy `completions/sciebo.bash` into a `bash-completion` completions directory, for example `~/.local/share/bash-completion/completions/sciebo`, or `source` it from `.bashrc`. |
+| zsh | Copy `completions/_sciebo` onto a directory on `$fpath`, then run `compinit` (or open a new shell). |
+| fish | Copy `completions/sciebo.fish` to `~/.config/fish/completions/sciebo.fish`. |
 
 ## Quick start
 
@@ -147,8 +157,9 @@ cp .env.example .env    # fill in SCIEBO_URL, SCIEBO_USER, SCIEBO_APP_PASSWORD
 bin/sciebo setup        # writes the remote into ~/.config/rclone/rclone.conf
 ```
 
-`SCIEBO_USER` looks like `alice@uni-muenster.de`. Find your institution's
-server in the
+`SCIEBO_USER` looks like `alice@your-university.de`, or a plain username on a
+Nextcloud server that doesn't use the `user@domain` scheme. Find your
+institution's server in the
 [sciebo server list](https://docs.sciebo.de/docs/getting-started/webinterface/serverliste/).
 `setup` normalizes the URL to `https://<host>/remote.php/dav/files/<user>/` so
 Nextcloud chunked uploads work, validates the remote, probes and prints the
@@ -198,8 +209,8 @@ bin/sciebo sync         # apply
 bin/sciebo status       # last run per source (+ --history)
 ```
 
-Initialize each `bisync` source once with `bin/sciebo sync --resync --apply`
-(`make bisync-resync`), and review the resync warning under
+Initialize each `bisync` source once with `bin/sciebo sync --resync --apply`,
+and review the resync warning under
 [Direction semantics](docs/commands.md#direction-semantics) first.
 
 **5. Inspect and tune.**
@@ -231,68 +242,72 @@ that runs `sync --apply --quiet` periodically, one agent per profile with
 
 ## Commands
 
-Run `bin/sciebo` from the project root, or put it on your `PATH`. Common
-commands have a `make` target (`make help` lists them; they don't forward
-extra arguments), but the CLI is the full interface.
+Run `bin/sciebo` from the project root, or put it on your `PATH` after
+`make install`. The commands below are grouped by what they're for; the full
+option tables, exit codes, and examples are in
+[docs/commands.md](docs/commands.md). Several also have a `make` target
+(`make help` lists them), but the CLI is the complete interface.
 
-| Command | Purpose |
+| Group | Commands |
 | --- | --- |
-| `sciebo setup [--login] [--url URL] [--no-keychain] [--rotate] [--proxy URL] [--crypt]` | create, update, or rotate the sciebo rclone remote (or a crypt wrapper) |
-| `sciebo provision --userid USER --apppassword PASS --serverurl URL [--localdirpath PATH] [--remotedirpath PATH] [--isvfsenabled 0\|1] [--profile NAME]` | non-interactive account and folder pair setup (desktop provisioning flags) |
-| `sciebo doctor [--offline] [--json]` | preflight checks (PASS/WARN/FAIL report, including the parity policies and the `QUOTA_WARN_PERCENT` quota check) |
-| `sciebo config <list\|get\|check\|edit>` | effective settings and their source layer |
-| `sciebo discover [--write]` | find git repositories under `roots.conf` |
-| `sciebo list [--json]` | list configured sources (read-only) |
-| `sciebo check [sync options]` | dry run of all sources (no changes) |
-| `sciebo sync [options]` | apply sync/pull/bisync for all sources (`--metered-ok` overrides metered gating) |
-| `sciebo verify [--only NAME] [--download] [--size-only] [--quiet]` | compare sources with destinations (read-only) |
-| `sciebo status [--only NAME] [--history [N]] [--json] [--watch [N]] [--quiet]` | last run per source, pause state, run history |
-| `sciebo watch [--interval N] [--debounce N] [--backend BACKEND] [--only NAME] [--remote-interval N] [--once] [--notify\|--no-notify]` | sync sources when they change (foreground, not a daemon) |
-| `sciebo pause [--for DURATION]` / `sciebo resume` | skip sync/check runs until resumed |
-| `sciebo folders [choose\|add\|import\|edit\|list\|pause\|resume\|remove]` | manage folder pairs (`choose` is the default and applies the folder policies; `edit` rewrites a pair's `--local`/`--remote` path, filter, or mode, refusing a stale-bisync `--remote` change unless `--force`; `list --json` shows the paused/hidden flags; `pause`/`resume` skip or re-enable a pair; `remove --purge` also drops the pair's bisync state and flags) |
-| `sciebo filters <sync\|list\|show\|check>` | filter files and the server's exclude list |
-| `sciebo mount [options]` / `sciebo umount <selector>` / `sciebo mounts [--check] [--prune] [--json]` | on-demand `rclone nfsmount` and its state |
-| `sciebo hydrate SUB [--dest DIR] [--dry-run] [--quiet] [--json] [--progress]` | download a remote path on demand, with sync's filter layering |
-| `sciebo edit SUB [--editor CMD] [--no-upload] [--lock]` | download one file, open it, and upload it again when it changed |
-| `sciebo ignored [SUB] [--source NAME] [--json]` | list local files sync would not transfer ("Not synced") |
-| `sciebo announcements [--limit N] [--json]` | list server announcements (announcementcenter app) |
-| `sciebo preview SUB [--output FILE] [--size N]` | download a preview image for a remote file |
-| `sciebo download SUB [DEST] [--dry-run] [--force] [--resume] [--json] [--progress]` | download a remote file (resumable) or directory; a symlinked destination is refused |
-| `sciebo update [--check] [--json]` | update the local checkout from its git upstream |
-| `sciebo logs [list]` / `sciebo logs show NAME` / `sciebo logs tail NAME` / `sciebo logs path [NAME]` | resolve, print, or follow per-source sync logs |
-| `sciebo cleanup (--logs \| --uploads \| --state \| --junk \| --cache \| --support) [--apply]` | housekeeping, dry run by default |
-| `sciebo limit [--up RATE] [--down RATE] [--until DUR] [--show] [--clear] [--json]` / `sciebo unlimited` | runtime bandwidth cap for later syncs |
-| `sciebo network [--json]` | active interface, metered state, and proxy mode |
-| `sciebo schedule (install [--at-login] [--profiles LIST] \| uninstall \| status)` | scheduler agent lifecycle (launchd or systemd --user) |
-| `sciebo nextcloudcmd [OPTIONS] SOURCEDIR NEXTCLOUDURL` | one nextcloudcmd-compatible two-way run (`--progress`/`-P` shows rclone progress on a terminal) |
-| `sciebo trash [list\|restore\|rm\|empty]` | Nextcloud trashbin |
-| `sciebo versions SUB [options]` | list, download, restore, or delete file versions |
-| `sciebo share <subcommand>` | create, list (with `--json`/`--reshares`), update, remove shares; `pending`/`accept`/`decline` (including `accept\|decline --all`); `send-email`; accepted federated shares with `remote-list`; copy links; email/guest/circle/Talk/federated; file-drop and file-request links |
-| `sciebo notifications [options]` | list, filter, act on, watch, or delete Nextcloud notifications |
-| `sciebo activity [options]` | show (or notify about) the activity stream |
-| `sciebo presence [show\|set\|clear]` | show or set your Nextcloud user status |
-| `sciebo lock SUB` / `sciebo unlock SUB` / `sciebo unlock --all` / `sciebo locks [--prune\|--unlock-all]` | WebDAV file locks; `unlock --all`/`locks --unlock-all` release every recorded lock (confirmed) |
-| `sciebo quota [--json]` | server quota usage |
-| `sciebo file <info\|activity\|shares>` | details, activity, and shares for one remote path (`--json` on all three) |
-| `sciebo search TERM [--limit N] [--json] [--open]` | unified search on the server |
-| `sciebo recent [--since DUR] [--limit N] [--json]` | recently modified remote files |
-| `sciebo comments <SUB [list] \| SUB add MESSAGE \| SUB delete ID>` | file comments (Nextcloud comments app) |
-| `sciebo favorites [list\|add\|remove] [--json]` | list or toggle server-side favorites |
-| `sciebo tags <list\|create\|assign\|clear> [--json]` | list system tags and assign them |
-| `sciebo server <info\|capabilities\|status>` | server URL, user, capabilities, reachability |
-| `sciebo account <list\|add\|import\|remove\|use\|info\|avatar\|status>` / `sciebo logout [--revoke] [--yes]` | manage profiles, credentials, account info, and desktop-client migration (`import`); `logout --revoke` revokes the app password server-side first |
-| `sciebo open [SUB] [--print] [--web]` | open a local sync folder or the web UI |
-| `sciebo conflicts [--kind copy\|case\|all] [--remote] [--open] [--only NAME] [--quiet]` / `sciebo conflicts --resolve MODE [--apply] [--yes]` | find or resolve local conflict copies and case-clash quarantines, or list remote case clashes with `--remote` |
-| `sciebo support [--output FILE] [--no-network] [--json]` | build a redacted debug archive |
-| `sciebo retry [NAME [PATH]] [--list] [--all]` | clear failure-blacklist entries |
-| `sciebo help [command]` | usage; `<command> --help` works too |
+| Account and setup | `setup`, `provision`, `account`, `logout`, `config` |
+| Preflight and discovery | `doctor`, `discover`, `list`, `filters`, `ignored`, `network`, `folders` |
+| Syncing | `check`, `sync`, `nextcloudcmd`, `watch`, `edit`, `verify`, `status`, `pause`, `resume`, `limit`, `unlimited` |
+| Mounts | `mount`, `umount`, `mounts`, `hydrate`, `open` |
+| Housekeeping and scheduling | `cleanup`, `logs`, `schedule`, `support`, `retry`, `conflicts` |
+| Server features (shares, activity, etc.) | `share`, `notifications`, `activity`, `presence`, `lock`, `unlock`, `locks`, `quota`, `file`, `search`, `recent`, `comments`, `favorites`, `tags`, `server`, `trash`, `versions`, `announcements`, `preview`, `download` |
+| Other | `update`, `help` |
 
 Global options may appear before or after the command, but they are consumed
-before the command runs: `--profile NAME`, `--trust`,
-`--non-interactive`, `--debug`, `--log-file FILE`, `--log-dir DIR`,
-`--log-expire HOURS`, `--confdir DIR`, `--version`. Full option tables,
-confirmation requirements, and exit codes are in
-[docs/commands.md](docs/commands.md).
+before the command runs: `--profile NAME`, `--trust`, `--non-interactive`,
+`--debug`, `--log-file FILE`, `--log-dir DIR`, `--log-expire HOURS`,
+`--confdir DIR`, `--version`.
+
+## Configuration
+
+Settings live in `config/settings.env` (tracked defaults) and
+`config/settings.local.env` (your gitignored overrides); a profile can add
+its own layer on top. `sciebo config list` prints every effective setting and
+which layer it came from, and `sciebo config edit` opens the local override
+file. Every setting, its default, and the precedence rules are in
+[docs/settings.md](docs/settings.md).
+
+## Safety model
+
+- `check` and `verify` never change anything; transfers and deletions happen
+  only through `sync` and `cleanup --apply`, one run at a time behind a lock.
+- Desktop-client parity policies are safe by default: invalid names, local
+  case-only collisions, and server-side E2EE folders are excluded from a
+  transfer; external storages and big folders ask before the first sync.
+- A `sync` that would delete more files than `DELETE_FILES_THRESHOLD` stops
+  and asks (or fails a non-interactive run) unless `sync --yes` is given.
+- Git is not special-cased: `.git/` syncs as files, so avoid syncing a repo
+  while git is rewriting objects, and don't run `bisync` on a repository
+  you're actively working in.
+- Bisync conflict copies stay local by default; `conflicts --resolve`
+  reviews and resolves them.
+
+The full policy list, conflict handling, and what's deliberately out of
+scope (Nextcloud E2EE, a background sync daemon, a virtual-files overlay) are
+in [docs/parity.md](docs/parity.md).
+
+## sciebo etiquette
+
+This section is about the sciebo service specifically; other Nextcloud
+servers may set different limits. sciebo warns that WebDAV is unsupported
+and asks users to keep sync intervals large and sync only what is needed.
+The defaults here are deliberately gentle (`TRANSFERS=2`, `CHECKERS=4`,
+`TPSLIMIT=8`); override them in `config/settings.local.env` for a
+self-hosted or more permissive server. Nextcloud admins can raise the chunk
+size to 1 GB server-side for better throughput ([Nextcloud
+docs](https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/big_file_upload_configuration.html#adjust-chunk-size-on-nextcloud-side)).
+`MAX_PARALLEL_SOURCES` is `1` for the same reason; raise it only if the server
+can take the extra connections. Upload chunking follows the desktop client:
+with `CHUNK_SIZE` unset, a chunk is derived once per run from
+`TARGET_CHUNK_UPLOAD_DURATION` times the effective upload throughput
+(`BW_LIMIT_UP`, else `TARGET_UPLOAD_THROUGHPUT`), capped at the server's
+maximum and clamped to `MIN_CHUNK_SIZE`/`MAX_CHUNK_SIZE` (`CHUNK_SIZE` always
+wins).
 
 ## Documentation
 
@@ -304,101 +319,11 @@ confirmation requirements, and exit codes are in
 | [docs/parity.md](docs/parity.md) | Nextcloud Desktop parity matrix and its limits |
 | [SECURITY.md](SECURITY.md) | where the app password lives and what protects it |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | development setup, tests, style |
+| [CHANGELOG.md](CHANGELOG.md) | what changed in each release |
 
-[docs/index.html](docs/index.html) is a standalone demo page with the full
-screenshot gallery and quick-start snippets.
-
-## sciebo etiquette
-
-sciebo warns that WebDAV is unsupported and asks users to keep sync intervals
-large and sync only what is needed. The defaults are deliberately gentle
-(`TRANSFERS=2`, `CHECKERS=4`, `TPSLIMIT=8`); override them in
-`config/settings.local.env`. Nextcloud admins can raise the chunk size to 1 GB
-server-side for better throughput ([Nextcloud
-docs](https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/big_file_upload_configuration.html#adjust-chunk-size-on-nextcloud-side)).
-`MAX_PARALLEL_SOURCES` is `1` for the same reason; raise it only if the server
-can take the extra connections. Upload chunking follows the desktop client:
-with `CHUNK_SIZE` unset, a chunk is derived once per run from
-`TARGET_CHUNK_UPLOAD_DURATION` times the effective upload throughput
-(`BW_LIMIT_UP`, else `TARGET_UPLOAD_THROUGHPUT`), capped at the server's
-maximum and clamped to `MIN_CHUNK_SIZE`/`MAX_CHUNK_SIZE` (`CHUNK_SIZE` always
-wins).
-
-## Caveats
-
-- Git is deliberately **not** special-cased. `.git/` is synced as files, so a
-  sync while `git gc`, `fetch`, or a commit rewrites objects can leave an
-  inconsistent repository in the cloud. For repos that have a git remote this
-  is usually fine; uncomment `- .git/` in `config/filters/clutter.txt` for
-  working trees only.
-- Don't run `bisync` on repositories you are actively working on.
-- A bisync conflict copy is a new file and can still reach the other side in
-  the run that creates it; later runs leave existing copies alone
-  (`CONFLICT_UPLOAD=0`), and `sync`/`pull` never upload them. The Nextcloud
-  desktop client always keeps its conflict copies local. `sciebo conflicts
-  --resolve MODE` resolves copies locally (dry run without `--apply`); a
-  `keep-both` copy is renamed so it no longer matches `CONFLICT_PATTERN` and
-  uploads on the next run.
-- `sciebo watch` is a foreground command, not a background service: close it
-  (Ctrl-C) to stop watching. It detects local changes with `fswatch` or
-  `inotifywait` when installed and portable polling otherwise. There is no
-  notify_push integration, so remote changes need `--remote-interval` (a dry
-  run that only notifies) or a normal `sync`/`schedule` run.
-- The policy defaults change what a run touches. Non-portable names
-  (Windows-invalid characters, brackets, trailing dot or space, reserved
-  device names) are excluded from the transfer
-  (`INVALID_NAME_POLICY=exclude`, the desktop client's behavior) and reported
-  by `doctor`; set `INVALID_NAME_POLICY=warn` to sync them with a warning.
-  Server-side E2EE folders are excluded the same way (`E2EE_POLICY=exclude`),
-  and external storages and big folders are gated
-  (`EXTERNAL_STORAGE_POLICY=ask`, `BIG_FOLDER_POLICY=ask`,
-  `BIG_FOLDER_EXISTING_POLICY=warn`).
-- Local case-only collisions (`Report.txt` vs `report.txt`) are detected in
-  the sync preflight; with the default `CASE_CLASH_POLICY=exclude` the later
-  path is not transferred, `rename` quarantines it as
-  `<name> (case conflict)<ext>`, and `conflicts --kind case` lists those
-  quarantines. Remote-side collisions are opt-in: `conflicts --kind case
-  --remote` lists them on demand, and `CASE_CLASH_REMOTE_SCAN=1` applies the
-  same policy during a sync. Remote paths are never renamed, so `rename`
-  excludes the losing path there instead.
-- The delete guard is on by default: an apply that would delete more than
-  `DELETE_FILES_THRESHOLD` (100) files is stopped. On a terminal `sync` asks
-  once; a non-interactive run fails that source with a message, and
-  `sync --yes` allows the deletions. Set `ASK_DELETE=0` to disable the guard,
-  or `MOVE_TO_TRASH=1` to move locally deleted pull/bisync files into
-  `LOCAL_TRASH_DIR` (or `BACKUP_DIR`) instead.
-- `folders pause NAME` skips one pair without pausing every source: the pair
-  is reported as skipped by `sync`/`check` until `folders resume NAME`, and
-  `sync --force` overrides it for one run. The related hidden flag (set by
-  `account import` from the desktop client's `ignoreHiddenFiles`) excludes
-  dot-files for that pair alone, like `SKIP_HIDDEN=1` does globally.
-- Mutual TLS, a custom trust store, and a User-Agent override are available
-  through `CLIENT_CERT`, `CLIENT_KEY`, `CLIENT_KEY_PASSWORD`, `CA_CERT`, and
-  `USER_AGENT`; each set PEM path must exist and be readable, and
-  `CLIENT_KEY_PASSWORD` is obscured before rclone receives it.
-- Direct WebDAV/OCS calls are bounded by `HTTP_TIMEOUT`, `HTTP_RETRIES`, and
-  `HTTP_RETRY_DELAY`, and GET/HEAD requests follow up to `HTTP_MAX_REDIRS`
-  redirects when `HTTP_FOLLOW_REDIRECTS=1` (writes never follow, so a
-  redirected POST cannot drop its body).
-- Nextcloud end-to-end encryption (E2EE) is not implemented: sciebo cannot
-  read E2EE folders, and the default `E2EE_POLICY=exclude` leaves them out of
-  the transfer entirely (`allow` downloads the undecryptable blobs).
-  `sciebo setup --crypt` creates an rclone crypt remote as an alternative for
-  protecting data on the server, but its passwords stay obscured in the
-  rclone config (the keychain stores one secret per remote) and the encrypted
-  content is opaque to the web UI, sharing, and other clients as well.
-- Unicode normalization is not checked: names that differ only in NFC/NFD form
-  are treated as different names, which can look like duplicates on other
-  systems.
-- Multi-account setups are supported through `--profile`; each profile has its
-  own remote, manifests, filters, state, locks, and keychain service,
-  `account import` can seed them from the desktop client, and `schedule
-  install --profiles` can render one agent per profile. Deliberately not
-  implemented: a native macOS File Provider / Windows virtual-files overlay
-  and a background notify_push daemon; `sciebo mount` covers on-demand access
-  where the platform NFS client allows it.
-- sciebo does not officially support WebDAV and offers no support for related
-  issues. Keep backups.
+[docs/index.html](docs/index.html), also published at
+<https://sebastianspicker.github.io/rclone-sciebo-webdav/>, is a standalone
+demo page with the full screenshot gallery and quick-start snippets.
 
 ## Development
 
@@ -411,7 +336,7 @@ make screenshots  # regenerate docs/assets/screenshots/*.svg
 The tests never touch sciebo or your real configuration: state, manifests, and
 the remote are redirected into a temp directory, and the integration suite runs
 against a temporary `local` rclone remote. See
-[docs/architecture.md](docs/architecture.md#tests) for the suite layout and
+[docs/architecture.md](docs/architecture.md#tests-and-tooling) for the suite layout and
 [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## Migrating from `scripts/*.sh`
@@ -424,6 +349,13 @@ entrypoint. A compatibility shim remains at `scripts/sync.sh` (`--apply` means
 `sync`, `--list` means `list`), and `scripts/nextcloudcmd` forwards to
 `bin/sciebo nextcloudcmd` for cron jobs and scripts that still call the old
 nextcloudcmd wrapper; delete both once every machine has been updated.
+
+## Contributing and security
+
+Bug reports and pull requests are welcome; see
+[CONTRIBUTING.md](CONTRIBUTING.md) for the development setup and test
+commands. Report suspected vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md), not in a public issue.
 
 ## License
 

@@ -41,9 +41,14 @@ recent_parse() {
   '
 }
 
-# recent_sorted PARSED LIMIT - newest first, capped at LIMIT rows.
+# recent_sorted PARSED LIMIT - newest first, capped at LIMIT rows. `sort`
+# runs inside a process substitution, so `mapfile -n` stopping before EOF
+# never turns into a SIGPIPE on the pipeline itself (pipefail would
+# otherwise fail this on large listings once `head` closed the pipe early).
 recent_sorted() {
-  printf '%s\n' "$1" | sort -r | head -n "$2"
+  local -a lines=()
+  mapfile -t -n "$2" lines < <(printf '%s\n' "$1" | sort -r)
+  printf '%s\n' "${lines[@]}"
 }
 
 # recent_print_text PARSED LIMIT - the MODIFIED/SIZE/PATH table.

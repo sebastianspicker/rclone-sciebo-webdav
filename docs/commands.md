@@ -1,10 +1,11 @@
 # Commands
 
-Complete reference for the `sciebo` CLI. The command set is defined by the
-`COMMANDS` list in [`bin/sciebo`](../bin/sciebo); `sciebo help <command>` or
+Complete reference for the `sciebo` CLI. The command set is defined by
+[`lib/cli/sciebo.spec`](../lib/cli/sciebo.spec), generated into
+`lib/cli/registry.sh`'s `SCIEBO_COMMANDS` list; `sciebo help <command>` or
 `<command> --help` prints the same usage text the CLI uses.
 
-Commands come in two tiers, marked in `completions/sciebo.spec` and shown
+Commands come in two tiers, marked in `lib/cli/sciebo.spec` and shown
 separately by `sciebo help`. **Core** commands are the sync workflow plus the
 file operations the real-server contract suite (`tests/contract/`) exercises
 against a live Nextcloud. **Extra** commands (`notifications`, `activity`,
@@ -126,7 +127,7 @@ from `CHUNK_SIZE`.
 Connection values come from the environment, from `.env` in the project root,
 or interactively (prompts are skipped when all three are set):
 
-- `SCIEBO_URL` — Nextcloud base URL, e.g. `https://uni-muenster.sciebo.de`
+- `SCIEBO_URL` — Nextcloud base URL, e.g. `https://your-university.sciebo.de`
   (the remote's stored URL always gets `/remote.php/dav/files/<user>/`
   appended).
 - `SCIEBO_USER` — sciebo ID in `<localid>@<scope>` form.
@@ -145,7 +146,7 @@ Examples:
 
 ```sh
 sciebo setup --login
-sciebo --profile work setup --login --url https://uni-muenster.sciebo.de
+sciebo --profile work setup --login --url https://your-university.sciebo.de
 sciebo setup --rotate --no-keychain
 sciebo setup --proxy http://proxy.example:3128
 sciebo setup --crypt
@@ -276,10 +277,10 @@ exits 1, and success exits 0.
 
 ```sh
 sciebo provision --userid alice --apppassword-fd 3 \
-  --serverurl https://uni-muenster.sciebo.de \
+  --serverurl https://your-university.sciebo.de \
   --localdirpath ~/sciebo --remotedirpath backup 3<<<"$PW"
 sciebo --profile work provision --userid alice --apppassword "$PW" \
-  --serverurl https://uni-muenster.sciebo.de
+  --serverurl https://your-university.sciebo.de
 ```
 
 ### logout
@@ -505,7 +506,9 @@ Choose sciebo folders to pair with local directories, Nextcloud-client style.
 The default command is `choose`. The wizard
 writes only `config/folders.conf` and pair filter files under
 `config/filters/`; it never transfers data and never touches `sources.conf`
-or `sources.generated.conf`. Commits take the run lock.
+or `sources.generated.conf`. Commits take the run lock. After adding pairs,
+run `sciebo check` for a dry run, then `sciebo sync`; a new `bisync` pair
+needs one `sciebo sync --resync --apply` first.
 
 Commands: `choose` (default), `add`, `import`, `edit`, `list`, `pause`, `resume`, `remove`.
 
@@ -812,11 +815,11 @@ conflict copies are excluded unless `CONFLICT_UPLOAD=1`. Exit 1 when rclone
 fails.
 
 ```sh
-scripts/nextcloudcmd --path notes ~/notes https://uni-muenster.sciebo.de
-sciebo nextcloudcmd --user alice@uni-muenster.de --password "$PW" ~/notes https://uni-muenster.sciebo.de
-sciebo nextcloudcmd --user alice@uni-muenster.de --password-fd 3 3<<<"$PW" ~/notes https://uni-muenster.sciebo.de
-sciebo nextcloudcmd --dry-run ~/notes https://uni-muenster.sciebo.de
-sciebo nextcloudcmd --exclude-anchored .sync-exclude ~/notes https://uni-muenster.sciebo.de
+scripts/nextcloudcmd --path notes ~/notes https://your-university.sciebo.de
+sciebo nextcloudcmd --user alice@your-university.de --password "$PW" ~/notes https://your-university.sciebo.de
+sciebo nextcloudcmd --user alice@your-university.de --password-fd 3 3<<<"$PW" ~/notes https://your-university.sciebo.de
+sciebo nextcloudcmd --dry-run ~/notes https://your-university.sciebo.de
+sciebo nextcloudcmd --exclude-anchored .sync-exclude ~/notes https://your-university.sciebo.de
 ```
 
 ### watch
@@ -1226,7 +1229,7 @@ sciebo support --output /tmp/sciebo-support.tar.gz
 ## Server data
 
 The commands in this section build on the configured remote. The ones that
-talk to Nextcloud through `lib/http.sh` (`share`, `notifications`, `activity`,
+talk to Nextcloud through `lib/adapters/http.sh` (`share`, `notifications`, `activity`,
 `presence`, `lock`, `trash`, `versions`, `file`, `search`, `comments`,
 `favorites`, `tags`, `server`) honor `HTTP_TIMEOUT`, `HTTP_RETRIES`,
 `HTTP_RETRY_DELAY`, `HTTP_FOLLOW_REDIRECTS`/`HTTP_MAX_REDIRS`, and
@@ -1403,7 +1406,7 @@ sciebo share link requests --file-request --download 0
 sciebo share email papers alice@example.com --send-password-by-talk --password secret
 sciebo share guest papers guest@example.com --send-mail
 sciebo share search alice
-sciebo share user papers alice@uni-muenster.de
+sciebo share user papers alice@your-university.de
 sciebo share list papers
 sciebo share list --reshares --json
 sciebo share remote-list --json

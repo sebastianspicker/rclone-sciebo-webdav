@@ -146,8 +146,6 @@ expect_eq "http_scrub_secrets: keeps valid UTF-8" "grüße€😀" \
 # The direct harness needs remote_secret_plain, exactly like bin/sciebo
 # sources it. Probes run in a subshell so http_request's die() cannot end the
 # suite; the stub curl serves the canned status routes.
-# shellcheck disable=SC1090,SC1091
-source "${PROJ}/lib/rclone.sh"
 
 # --- http_secret: resolved once per process, dropped on invalidate ----------
 # A counting resolver proves the forkless capture runs remote_secret_plain in

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# keychain.sh - keychain backends (stub `security` in a private bin dir) (lib/keychain.sh).
+# keychain.sh - keychain backends (stub `security` in a private bin dir) (lib/adapters/keychain.sh).
 # Sourced setup lives in tests/unit/common.sh; run standalone with
 # `bash tests/unit/keychain.sh`.
 set -uo pipefail

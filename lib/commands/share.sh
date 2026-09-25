@@ -289,14 +289,12 @@ share_add_field() {
 }
 
 # share_server_major - print the server major version from the capabilities
-# cache (CAP_VERSION), or nothing when the version is unknown. Loads the cache
-# through capabilities_load when that helper is available; older servers and
-# runs without a cache stay unknown.
+# cache (CAP_VERSION), or nothing when the version is unknown. Loads the
+# cache through capabilities_load; older servers and runs without a cache
+# stay unknown.
 share_server_major() {
   local version="" major=""
-  if type capabilities_load >/dev/null 2>&1; then
-    capabilities_load 2>/dev/null || true
-  fi
+  capabilities_load 2>/dev/null || true
   version="${CAP_VERSION:-}"
   major="${version%%.*}"
   case "$major" in
@@ -1360,10 +1358,6 @@ cmd_share() {
   # `sciebo share --help` parses none of them: the OCS sharing calls and
   # chunked-upload labels use http/nc_api/capabilities, and the argument
   # split plus the confirm gates use the ui helpers.
-  sciebo_require_module http xml_get
-  sciebo_require_module nc_api nc_dav_request_allow
-  sciebo_require_module capabilities capabilities_load
-  sciebo_require_module ui ui_confirm_mutation
   share_split_args "${OPT_EXTRA:-}"
   sub="$SHARE_SUB"
   case "$sub" in

@@ -2,7 +2,7 @@
 
 `sciebo` is configured entirely through shell-style files and environment
 variables. There is no separate config parser: files are sourced by
-`lib/settings.sh`, so quoting rules are Bash's.
+`lib/config/settings.sh`, so quoting rules are Bash's.
 
 - [Precedence](#precedence)
 - [Profiles](#profiles)
@@ -170,8 +170,8 @@ directory (conservative defaults: `.DS_Store`, `._*`, `Thumbs.db`, `*.part`,
 Optional, only read by `setup` (and checked by `doctor`/`logout`):
 
 ```
-SCIEBO_URL="https://uni-muenster.sciebo.de"
-SCIEBO_USER="alice@uni-muenster.de"
+SCIEBO_URL="https://your-university.sciebo.de"
+SCIEBO_USER="alice@your-university.de"
 SCIEBO_APP_PASSWORD="app-password"
 ```
 
@@ -373,23 +373,23 @@ set, otherwise `LOCAL_TRASH_DIR`. Empty `LOCAL_TRASH_DIR` derives
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `HTTP_TIMEOUT` | `30` | curl timeout in seconds for the direct WebDAV/OCS calls made through `lib/http.sh` and `lib/nc_api.sh` (share, notifications, activity, presence, lock, trash, versions, file, search, recent, comments, favorites, tags). |
+| `HTTP_TIMEOUT` | `30` | curl timeout in seconds for the direct WebDAV/OCS calls made through `lib/adapters/http.sh` and `lib/adapters/nc_api.sh` (share, notifications, activity, presence, lock, trash, versions, file, search, recent, comments, favorites, tags). |
 | `HTTP_RETRIES` | `2` | curl retries for those calls. |
 | `HTTP_RETRY_DELAY` | `1` | seconds curl waits between retries (`--retry-delay`). |
 | `HTTP_FOLLOW_REDIRECTS` | `1` | `1` makes GET/HEAD calls follow redirects up to `HTTP_MAX_REDIRS` hops (`--location`); writes never follow, so a POST/PUT body is never silently dropped. |
 | `HTTP_MAX_REDIRS` | `5` | maximum redirect hops for GET/HEAD when `HTTP_FOLLOW_REDIRECTS=1` (`--max-redirs`). |
 | `HTTP2_ENABLED` | `1` | `0` forces HTTP/1.1 (the desktop client default): rclone gets `--disable-http2` and the curl calls get `--http1.1`; `1` keeps the tools' HTTP/2 default. |
-| `TLS_INSECURE` | `0` | `1` accepts invalid TLS certificates: rclone gets `--no-check-certificate` and the `lib/http.sh` curl calls get `--insecure`, including the capabilities probe. Also available per run as the global `--trust`. The Login Flow's own curl calls verify certificates by default too and honor `--trust`/`TLS_INSECURE=1` as well (a one-time warning prints when verification is disabled). |
+| `TLS_INSECURE` | `0` | `1` accepts invalid TLS certificates: rclone gets `--no-check-certificate` and the `lib/adapters/http.sh` curl calls get `--insecure`, including the capabilities probe. Also available per run as the global `--trust`. The Login Flow's own curl calls verify certificates by default too and honor `--trust`/`TLS_INSECURE=1` as well (a one-time warning prints when verification is disabled). |
 
 `HTTP_CONNECT_TIMEOUT` (environment, default `15`) bounds the connect phase
-of every `lib/http.sh` curl call. It is a runtime knob, not a
+of every `lib/adapters/http.sh` curl call. It is a runtime knob, not a
 `settings.env` key.
 
 ### Client certificates and User-Agent
 
 Mutual TLS (mTLS), a custom trust store, and a User-Agent override, matching
 the desktop client. All are empty by default. Each path must name an existing,
-readable file when set: `lib/settings.sh` fails fast at load time, while
+readable file when set: `lib/config/settings.sh` fails fast at load time, while
 `doctor` (which sets `SCIEBO_SKIP_FILE_CHECKS=1`) reports the missing file as a
 FAIL instead of aborting the report. `CLIENT_KEY_PASSWORD` and `USER_AGENT`
 are not paths. Layering is the same as every other setting (see
@@ -500,8 +500,8 @@ runs `sync --apply --quiet --only NAME` when one changes.
 `filters sync` caches the raw list under `SERVER_EXCLUDE_FILE` and regenerates
 the rclone filter atomically. With `FILTER_SERVER_SYNC=1` the generated filter
 is passed to rclone before `clutter.txt` and the entry filter, so its rules
-match first. A missing cache means it is simply not layered and `doctor`
-warns; a stale cache is still layered, and only `doctor` warns (against
+match first. A missing cache is not layered at all, and `doctor` warns; a
+stale cache is still layered, and `doctor` only warns (against
 `SERVER_EXCLUDE_MAX_AGE`).
 
 ### Housekeeping
@@ -541,7 +541,7 @@ for the run.
 ## Key storage backends
 
 With `KEYCHAIN=1` (the default), the backend is selected by
-`lib/platform.sh`:
+`lib/adapters/platform.sh`:
 
 - macOS: the login Keychain via `security`.
 - Linux: `secret-tool` (libsecret) when installed, otherwise `pass`. Both
@@ -549,7 +549,7 @@ With `KEYCHAIN=1` (the default), the backend is selected by
 - New setups store the plaintext app password under service
   `KEYCHAIN_SERVICE` and account `<RCLONE_REMOTE>#plain`; the rclone config
   then holds an obscured empty value. Keeping the plaintext in the keychain
-  means the HTTP layer (`lib/http.sh`) reads it directly and never runs
+  means the HTTP layer (`lib/adapters/http.sh`) reads it directly and never runs
   `rclone reveal`, whose argv-visible obscured value would be exposed to the
   process list.
 - A legacy install that still holds the obscured password under account
@@ -570,7 +570,7 @@ See [SECURITY.md](../SECURITY.md) for the full threat model.
 ## TLS
 
 Certificate verification is on by default. `TLS_INSECURE=1` or the global
-`--trust` flag accepts invalid certificates for rclone and the `lib/http.sh`
+`--trust` flag accepts invalid certificates for rclone and the `lib/adapters/http.sh`
 curl calls (`--no-check-certificate` / `--insecure`), including the OCS
 capabilities probe; use it only on trusted networks against self-signed
 servers, and prefer fixing the certificate. The Login Flow's own curl calls
@@ -586,7 +586,7 @@ that check too, printing a one-time warning.
 | `PROXY_DIRECT` | `0` | `1` ignores the proxy environment for rclone and curl in `system` mode. |
 
 Behavior: an explicit `http://` or `https://` `PROXY` is exported to the
-rclone and `lib/http.sh` curl children through
+rclone and `lib/adapters/http.sh` curl children through
 `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`, so any embedded credentials never
 appear in the process argv. A `socks5://` `PROXY` keeps the explicit flags
 instead (`--http-proxy` for rclone, `-x URL` for curl; environment socks
@@ -684,7 +684,7 @@ With the default profile, `STATE_DIR` is `state/` in the project checkout
 
 `bin/sciebo` sets `umask 077`, and records are written atomically with mode
 600. A state directory written by a newer layout version is refused so an old
-binary cannot corrupt it (see [docs/architecture.md](architecture.md#state-migrations)).
+binary cannot corrupt it (see [docs/architecture.md](architecture.md#state-and-configuration)).
 
 ## Common overrides
 
@@ -746,4 +746,4 @@ for tests and debugging and are not part of the supported surface:
 | `LOGIN_FLOW_POLL_INTERVAL` / `LOGIN_FLOW_TIMEOUT` / `LOGIN_FLOW_MAX_POLLS` | `2` / `1200` / unset | `setup --login` polling. |
 | `LOGIN_FLOW_NO_BROWSER` | unset | print the login URL instead of opening a browser. |
 | `DOCTOR_NAME_SCAN_LIMIT` | `50000` | cap on paths inspected per source by the `doctor` name-hygiene scan. |
-| `SCIEBO_KEYCHAIN_BACKEND` / `SCIEBO_NOTIFY_BACKEND` / `SCIEBO_SCHEDULER_BACKEND` / `SCIEBO_NETWORK_BACKEND` | unset | override backend probing in `lib/platform.sh` (tests; the network backend accepts `macos`, `linux`, or `none`). |
+| `SCIEBO_KEYCHAIN_BACKEND` / `SCIEBO_NOTIFY_BACKEND` / `SCIEBO_SCHEDULER_BACKEND` / `SCIEBO_NETWORK_BACKEND` | unset | override backend probing in `lib/adapters/platform.sh` (tests; the network backend accepts `macos`, `linux`, or `none`). |

@@ -43,7 +43,7 @@ audit, and it names the residual exposures that are accepted by design.
   (`RCLONE_CONFIG_<REMOTE>_PASS`); the parent environment is not modified.
   A process environment is readable by the same user (and by root), so it is
   only as private as the account.
-- Direct HTTP calls (`lib/http.sh`) write the plain password to a mode-600
+- Direct HTTP calls (`lib/adapters/http.sh`) write the plain password to a mode-600
   netrc temp file and pass `--netrc-file`; the password never appears in the
   curl argv (`ps`, process listings). In the top-level process the file is
   created once and reused: it is emptied (truncated) after every request, on
@@ -67,10 +67,10 @@ audit, and it names the residual exposures that are accepted by design.
   `SIGKILL` during that loop can leave it behind. Delete leftovers if you
   suspect one.
 - Passwords containing control bytes (newline, CR, TAB) cannot be represented
-  in netrc safely; `lib/http.sh` refuses such a password instead of falling
+  in netrc safely; `lib/adapters/http.sh` refuses such a password instead of falling
   back to `-u user:password` in the argv.
-- The OCS capabilities probe in `lib/capabilities.sh` uses the same netrc
-  treatment when `lib/http.sh` is loaded (it always is in `bin/sciebo`). The
+- The OCS capabilities probe in `lib/adapters/capabilities.sh` uses the same netrc
+  treatment when `lib/adapters/http.sh` is loaded (it always is in `bin/sciebo`). The
   standalone path used when the library is sourced alone (the unit-test
   harness) also writes a mode-600 netrc and refuses a control-byte secret;
   there is no `-u user:password` fallback in `lib/`.
